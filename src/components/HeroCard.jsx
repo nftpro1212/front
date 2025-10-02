@@ -28,7 +28,7 @@ export default function HeroCard({ onSubscribe }) {
             onClick={onSubscribe} 
             className="btn-neon text-white px-5 py-3 rounded-xl font-semibold shadow-lg"
           >
-            Obuna bo‘lish $9.99
+            Obuna bo‘lish 100.000 so'm
           </button>
           <button className="bg-white/6 border border-white/6 text-white px-4 py-3 rounded-xl">
             Qanday ishlaydi?
