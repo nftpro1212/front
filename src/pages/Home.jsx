@@ -8,7 +8,6 @@ import BenefitsGrid from "../components/BenefitsGrid";
 import LiveFeed from "../components/LiveFeed";
 import FAQAccordion from "../components/FAQAccordion";
 import NotificationBanner from "../components/NotificationBanner";
-
 export default function Home(){
   // demo data & state
   const [showNotif, setShowNotif] = useState(false);

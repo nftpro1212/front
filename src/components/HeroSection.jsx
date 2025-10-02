@@ -35,7 +35,7 @@ export default function HeroSection(){
 
         <motion.div initial={{ x: 60, opacity: 0 }} animate={{ x: 0, opacity: 1 }} className="glass p-6 rounded-2xl">
           <div className="flex flex-col items-center">
-            <img src="/car-illustration.png" alt="car" className="w-full max-w-sm" />
+            <img src="/car-illustration.png" alt="Mashina" className="w-full max-w-sm" />
             <p className="text-sm small mt-3">High chance to win when many join — invite friends!</p>
           </div>
         </motion.div>
