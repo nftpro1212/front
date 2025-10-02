@@ -2,7 +2,7 @@ import React, { useRef } from "react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 
-const prizes = ["🚘 Car", "📱 iPhone", "🎧 AirPods", "💰 Gift Cards"];
+const prizes = ["🚘 Mashina", "📱 iPhone", "🎧 AirPods", "💰 Pul"];
 
 const PrizeCarousel = () => {
   const [index, setIndex] = useState(0);

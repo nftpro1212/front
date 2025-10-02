@@ -7,21 +7,39 @@ export default function ProgressGoal({ current = 0, goal = 3000 }) {
     <div className="glass p-4 rounded-2xl">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-xs small">Monthly Goal</div>
-          <div className="text-lg font-semibold">Car Draw Threshold</div>
+          <div className="text-xs small">Oylik Maqsad</div>
+          <div className="text-lg font-semibold">Avtomobil Lotereyasi Chegarasi</div>
         </div>
         <div className="text-right">
-          <div className="font-bold text-cyan-300">{current} / {goal}</div>
-          <div className="text-xs text-gray-300">Reach {goal} premium users</div>
+          <div className="font-bold text-cyan-300">
+            {current} / {goal}
+          </div>
+          <div className="text-xs text-gray-300">
+            {goal} ta premium foydalanuvchiga yetish
+          </div>
         </div>
       </div>
 
       <div className="mt-3">
         <div className="w-full bg-white/5 rounded-full h-3 overflow-hidden">
-          <motion.div initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ duration: 1.2 }} className="h-3 rounded-full" style={{ background: 'linear-gradient(90deg,#06b6d4,#7c3aed)' }} />
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${pct}%` }}
+            transition={{ duration: 1.2 }}
+            className="h-3 rounded-full"
+            style={{ background: "linear-gradient(90deg,#06b6d4,#7c3aed)" }}
+          />
         </div>
         <div className="mt-2 text-sm">
-          {pct < 100 ? (<span className="text-yellow-300">🚨 Not reached yet — invite friends!</span>) : (<span className="text-green-400">✅ Goal reached — car draw active!</span>)}
+          {pct < 100 ? (
+            <span className="text-yellow-300">
+              🚨 Hali yetmadi — do‘stlaringizni taklif qiling!
+            </span>
+          ) : (
+            <span className="text-green-400">
+              ✅ Maqsadga yetildi — avtomobil lotereyasi faollashdi!
+            </span>
+          )}
         </div>
       </div>
     </div>

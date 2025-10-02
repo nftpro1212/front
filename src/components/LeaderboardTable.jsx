@@ -12,9 +12,9 @@ const LeaderboardTable = () => {
       <table className="w-full text-sm text-left border border-gray-700 rounded-xl overflow-hidden">
         <thead className="bg-gray-800">
           <tr>
-            <th className="p-2">Rank</th>
-            <th className="p-2">User</th>
-            <th className="p-2">Referrals</th>
+            <th className="p-2">O‘rin</th>
+            <th className="p-2">Foydalanuvchi</th>
+            <th className="p-2">Takliflar soni</th>
           </tr>
         </thead>
         <tbody>

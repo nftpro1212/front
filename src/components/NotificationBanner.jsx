@@ -1,12 +1,17 @@
-import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function NotificationBanner({ show, message }) {
   return (
     <AnimatePresence>
       {show && (
-        <motion.div initial={{ y: -50, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -50, opacity: 0 }} className="fixed left-1/2 -translate-x-1/2 top-16 z-50 glass px-4 py-2 rounded-full">
-          <div className="text-sm">{message}</div>
+        <motion.div
+          initial={{ y: -60, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          exit={{ y: -60, opacity: 0 }}
+          transition={{ duration: 0.4 }}
+          className="fixed top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl shadow-lg text-sm z-50"
+        >
+          {message}
         </motion.div>
       )}
     </AnimatePresence>
