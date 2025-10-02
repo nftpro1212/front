@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom vars */
+:root{
+  --bg-gradient: linear-gradient(180deg,#07142a 0%, #071a35 100%);
+  --glass: rgba(255,255,255,0.06);
+  --glass-2: rgba(255,255,255,0.03);
+  --accent-from: #06b6d4;
+  --accent-to: #7c3aed;
+}
+
+/* Body */
+body {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background: var(--bg-gradient);
+  color: #e6eef8;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Glass card */
+.glass {
+  background: linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.04);
+  box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+}
+
+/* Neon gradient button */
+.btn-neon {
+  background: linear-gradient(90deg, var(--accent-from), var(--accent-to));
+  box-shadow: 0 6px 18px rgba(124,58,237,0.18), 0 0 30px rgba(6,182,212,0.06);
+}
+
+/* Soft text */
+.small { opacity: 0.85; font-size: 0.9rem; }
+
+/* simple avatar */
+.avatar {
+  width: 44px; height: 44px; border-radius: 9999px; object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.06);
+}
