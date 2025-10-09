@@ -5,7 +5,7 @@ const API = axios.create({
 });
 
 // auth
-export const telegramLogin = (tgId, username, startParam) => API.post('/auth/telegram-login', { telegramId: tgId, username, startParam });
+export const telegramLogin = (tgId, username, startParam) => API.post('/auth/login', { telegramId: tgId, username, startParam });
 
 // subscription
 export const createSubscription = (telegramId) => API.post(`/subscription/${telegramId}`, { provider: 'demo', amount: 2.0 });
