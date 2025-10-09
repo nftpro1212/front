@@ -1,7 +1,7 @@
 import axios from "axios";
-axios.defaults.headers.common['ngrok-skip-browser-warning'] = 'true';
+
 const API = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "https://backend-m6u1.onrender.com",
 });
 
 // 🔹 Telegram login
