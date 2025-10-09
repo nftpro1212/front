@@ -10,23 +10,23 @@ export default function Profile() {
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
 
-    // 🔹 Agar Telegram WebApp orqali kelingan bo‘lsa
     if (tg?.initDataUnsafe?.user) {
       const telegramUser = tg.initDataUnsafe.user;
       loginOrRegister(telegramUser.id, telegramUser.username);
     } else {
-      // 🔹 Test rejimida (Telegram bo‘lmaganda)
+      // 🔹 Test rejimida ishlash uchun
       loginOrRegister(9999, "test_user");
     }
   }, []);
 
-  // 🔹 Avtomatik login yoki ro‘yxatdan o‘tish
+  // 🔹 Login yoki register
   const loginOrRegister = async (telegramId, username) => {
     try {
-      const res = await API.post("/auth/login", { telegramId, username });
+      // 🔹 Backend 'tgId' ni kutadi, shuning uchun shu nomda yuboramiz
+      const res = await API.post("/auth/login", { tgId: telegramId, username });
       setUser(res.data.user);
     } catch (error) {
-      console.error("Login xatosi:", error);
+      console.error("Login xatosi:", error.response?.data || error.message);
     } finally {
       setLoading(false);
     }
@@ -40,7 +40,7 @@ export default function Profile() {
     return <div className="flex justify-center items-center h-screen">Foydalanuvchi topilmadi</div>;
   }
 
-  const referralLink = `https://t.me/YourBot?start=ref_${user._id}`;
+  const referralLink = `https://t.me/YourBot?start=${user.referralCode}`;
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-6 pb-32 space-y-6">
@@ -58,7 +58,7 @@ export default function Profile() {
             <div className="text-xs text-gray-400">@{user.username}</div>
             <div className="text-xs mt-1">
               Premium holati:{" "}
-              {user.premium.isActive ? (
+              {user?.premium?.isActive ? (
                 <span className="text-green-400">
                   Faol — {new Date(user.premium.expiresAt).toLocaleDateString()} gacha
                 </span>
@@ -70,10 +70,7 @@ export default function Profile() {
         </div>
       </div>
 
-      {/* Premium karta */}
       <PremiumCard />
-
-      {/* Referral */}
       <ReferralBox link={referralLink} />
     </div>
   );
