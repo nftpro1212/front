@@ -1,11 +1,11 @@
 import axios from 'axios';
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'https://backend-m6u1.onrender.com"',
+  baseURL: import.meta.env.VITE_API_URL || 'https://backend-m6u1.onrender.com',
   timeout: 10000
 });
 
 // auth
-export const telegramLogin = (tgId, username, startParam) => API.post('/auth/login', { telegramId: tgId, username, startParam });
+export const telegramLogin = (tgId, username, startParam) => API.post('/api/auth/login', { telegramId: tgId, username, startParam });
 
 // subscription
 export const createSubscription = (telegramId) => API.post(`/subscription/${telegramId}`, { provider: 'demo', amount: 2.0 });
