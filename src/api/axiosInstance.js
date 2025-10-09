@@ -2,7 +2,7 @@ import axios from "axios";
 
 // 🔹 Backend manziling
 const API = axios.create({
-  baseURL: "https://backend-m6u1.onrender.com",
+  baseURL: "https://backend-m6u1.onrender.com/api",
 });
 
 // 🔹 Telegram login funksiyasi
