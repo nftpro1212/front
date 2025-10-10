@@ -57,7 +57,8 @@ export default function Profile() {
   }
 
   // 🔹 Referral havola
-  const referralLink = `https://t.me/YourBotUsername?start=${user.referralCode}`;
+ 
+  const referralLink = `https://t.me/NFT_USERRBOT/car/app?start=${user.referralCode}`;
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-6 pb-32 space-y-6">
