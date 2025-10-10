@@ -66,7 +66,7 @@ export default function Profile() {
 
   // 🔹 Referral havolani to‘g‘ri formatda yaratamiz
  
-const referralLink = `https://t.me/nft_userbot?start=${user.referralCode}`;
+const referralLink = `https://t.me/nft_userrbot?start=${user.referralCode}`;
   return (
     <div className="max-w-2xl mx-auto px-4 pt-6 pb-32 space-y-6">
       <h1 className="text-2xl font-bold">👤 Profil</h1>
