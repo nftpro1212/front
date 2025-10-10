@@ -1,64 +1,60 @@
-import React from "react";
-import { QRCodeCanvas } from "qrcode.react";
-import { FiCopy, FiShare2 } from "react-icons/fi";
+import React, { useEffect, useState } from "react";
+import { Copy, Users } from "lucide-react";
+import API from "../api/axiosInstance";
 
 export default function ReferralBox({ link }) {
-  const copy = async () => {
-    await navigator.clipboard.writeText(link);
-    alert("Havola nusxalandi");
-  };
-  const share = async () => {
-    if (navigator.share) {
-      await navigator.share({ title: 'Premiumga qo‘shiling', text: 'Qo‘shiling va avtomobil yutib oling!', url: link });
-    } else {
-      copy();
+  const [copied, setCopied] = useState(false);
+  const [count, setCount] = useState(0);
+
+  // 🔹 Referral sonini olish
+  useEffect(() => {
+    const fetchReferralCount = async () => {
+      try {
+        const res = await API.get("/referrals/count");
+        setCount(res.data.count || 0);
+      } catch (error) {
+        console.error("❌ Referral count olishda xato:", error);
+      }
+    };
+
+    fetchReferralCount();
+  }, []);
+
+  // 🔹 Havolani nusxalash funksiyasi
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error("❌ Nusxalashda xato:", error);
     }
   };
 
   return (
-    <div className="glass p-4 rounded-2xl flex flex-col md:flex-row items-center gap-4">
-      <div className="p-3 bg-white/5 rounded-xl">
-        <QRCodeCanvas
-          value={link}
-          size={110}
-          bgColor="transparent"
-          fgColor="#e6eef8"
-          level="H"
-        />
+    <div className="glass p-4 rounded-2xl">
+      <h2 className="text-lg font-semibold mb-2">👥 Do‘stlarni taklif qil</h2>
+
+      <div className="flex items-center justify-between gap-2 bg-gray-900/50 border border-gray-800 p-2 rounded-xl">
+        <span className="text-xs truncate text-gray-300">{link}</span>
+        <button
+          onClick={copyLink}
+          className="p-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition flex items-center gap-1 text-sm"
+        >
+          <Copy size={16} />
+          {copied ? "Nusxalandi" : "Kopiyalash"}
+        </button>
       </div>
 
-      <div className="flex-1 w-full">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-sm font-semibold">Do‘stlaringizga ulashing</div>
-            <div className="text-xs small">Do‘stlaringiz obuna bo‘lsa, mukofot oling</div>
-          </div>
-        </div>
-
-        <div className="mt-3 flex gap-2">
-          <input
-            readOnly
-            value={link}
-            className="flex-1 bg-transparent border border-white/6 px-3 py-2 rounded-lg"
-          />
-          <button onClick={copy} className="bg-white/6 px-3 py-2 rounded-lg">
-            <FiCopy />
-          </button>
-          <button
-            onClick={share}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 px-3 py-2 rounded-lg text-white"
-          >
-            <FiShare2 />
-          </button>
-        </div>
-
-        <div className="mt-2 text-xs small">
-          Nishonlar:{" "}
-          <span className="text-yellow-300">Bronza</span> •{" "}
-          <span className="text-gray-300">Kumush</span> •{" "}
-          <span className="text-green-300">Oltin</span>
-        </div>
+      <div className="flex items-center gap-2 mt-4 text-gray-300 text-sm">
+        <Users size={18} className="text-cyan-400" />
+        Siz taklif qilganlar soni:{" "}
+        <span className="text-cyan-400 font-semibold">{count}</span>
       </div>
+
+      <p className="text-xs text-gray-500 mt-2">
+        Har bir yangi foydalanuvchi sizning havolangiz orqali ro‘yxatdan o‘tsa, siz mukofot ballari olasiz 🎁
+      </p>
     </div>
   );
 }
