@@ -34,14 +34,12 @@ export default function Home() {
       const telegramUser = tg.initDataUnsafe.user;
       loginOrRegister(telegramUser);
     } else {
-      // Tashqaridan kirganlar uchun — Telegram Login Widget
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
         setUser(JSON.parse(storedUser));
         setLoading(false);
       } else {
-        // Test rejimi (faqat dev uchun)
-        loginOrRegister({ id: 9999, username: "test_user" });
+        loginOrRegister({ id: 9999, username: "test_user" }); // Test
       }
     }
   }, []);
@@ -75,26 +73,50 @@ export default function Home() {
     }
   };
 
-  // 💳 Premium sotib olish demo funksiyasi
-  async function handleSubscribe() {
+  // 💳 Premiumga obuna bo‘lish – sotuvchiga yo‘naltirish
+  const handleSubscribe = async () => {
+    if (!user) return;
+
     try {
-      const res = await fetch("/api/subscribe", { method: "POST" });
-      if (!res.ok) throw new Error("To‘lov muvaffaqiyatsiz bo‘ldi");
-
-      setNotifMsg("🎉 Tabriklaymiz! Siz endi Premium a'zosiz.");
-      setShowNotif(true);
-      setTimeout(() => setShowNotif(false), 4000);
-
-      // Confetti effekti
-      import("canvas-confetti").then((confetti) => {
-        confetti.default({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
+      const res = await fetch("https://backend-m6u1.onrender.com/api/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tgId: user.tgId }),
       });
+
+      const data = await res.json();
+
+      if (data.success && data.paymentUrl) {
+        // Foydalanuvchini sotuvchi to‘lov sahifasiga yo‘naltirish
+        window.open(data.paymentUrl, "_blank");
+        setNotifMsg("💳 To‘lov sahifasiga yo‘naltirildingiz. To‘lovni tasdiqlang!");
+        setShowNotif(true);
+        setTimeout(() => setShowNotif(false), 5000);
+      } else {
+        throw new Error(data.message || "Xatolik yuz berdi");
+      }
     } catch (err) {
+      console.error(err);
       setNotifMsg("❌ Xatolik: to‘lov amalga oshmadi");
       setShowNotif(true);
-      setTimeout(() => setShowNotif(false), 4000);
+      setTimeout(() => setShowNotif(false), 5000);
     }
-  }
+  };
+
+  // 💚 Premium holatini tekshirish va avtomatik yangilash (opsional)
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`https://backend-m6u1.onrender.com/api/auth/user/${user.tgId}`);
+        const data = await res.json();
+        if (data.success) setUser(data.user);
+      } catch (err) {
+        console.error("Premium status tekshirish xatosi:", err);
+      }
+    }, 30_000); // 30 soniyada tekshirish
+    return () => clearInterval(interval);
+  }, [user]);
 
   if (loading) return <div className="flex justify-center items-center h-screen">Yuklanmoqda...</div>;
 
@@ -115,6 +137,9 @@ export default function Home() {
           <div>
             <div className="font-semibold text-lg">{user?.username || "Foydalanuvchi"}</div>
             <div className="text-xs text-gray-400">ID: {user?.tgId}</div>
+            <div className="text-xs mt-1">
+              Premium: {user?.premium?.isActive ? "✅ Faol" : "❌ Faol emas"}
+            </div>
           </div>
         </div>
       </div>
