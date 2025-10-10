@@ -39,7 +39,8 @@ export default function Home() {
         setUser(JSON.parse(storedUser));
         setLoading(false);
       } else {
-        loginOrRegister({ id: 9999, username: "test_user" }); // Test
+        // Test rejimi
+        loginOrRegister({ id: 9999, username: "test_user" });
       }
     }
   }, []);
@@ -73,50 +74,35 @@ export default function Home() {
     }
   };
 
-  // 💳 Premiumga obuna bo‘lish – sotuvchiga yo‘naltirish
-  const handleSubscribe = async () => {
+  // 💳 Premium sotib olish - sotuvchi sahifasiga yo'naltirish
+  async function handleSubscribe() {
     if (!user) return;
 
     try {
-      const res = await fetch("https://backend-m6u1.onrender.com/api/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tgId: user.tgId }),
-      });
+      // 1️⃣ Sotuvchi sahifasiga yo‘naltirish
+      const paymentUrl = `https://your-seller-page.com/pay?tgId=${user.tgId}`;
+      window.open(paymentUrl, "_blank");
 
-      const data = await res.json();
-
-      if (data.success && data.paymentUrl) {
-        // Foydalanuvchini sotuvchi to‘lov sahifasiga yo‘naltirish
-        window.open(data.paymentUrl, "_blank");
-        setNotifMsg("💳 To‘lov sahifasiga yo‘naltirildingiz. To‘lovni tasdiqlang!");
-        setShowNotif(true);
-        setTimeout(() => setShowNotif(false), 5000);
-      } else {
-        throw new Error(data.message || "Xatolik yuz berdi");
-      }
-    } catch (err) {
-      console.error(err);
-      setNotifMsg("❌ Xatolik: to‘lov amalga oshmadi");
+      // 2️⃣ Backend orqali premiumni tasdiqlash (sotuvchi tomonidan)
+      // Bu qadam sotuvchi tasdiqlagandan keyin amalga oshadi
+      setNotifMsg("💡 Sotuvchiga yo‘naltirildi. To‘lov tasdiqlangandan keyin Premium faollashadi.");
       setShowNotif(true);
       setTimeout(() => setShowNotif(false), 5000);
-    }
-  };
 
-  // 💚 Premium holatini tekshirish va avtomatik yangilash (opsional)
-  useEffect(() => {
-    if (!user) return;
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch(`https://backend-m6u1.onrender.com/api/auth/user/${user.tgId}`);
-        const data = await res.json();
-        if (data.success) setUser(data.user);
-      } catch (err) {
-        console.error("Premium status tekshirish xatosi:", err);
-      }
-    }, 30_000); // 30 soniyada tekshirish
-    return () => clearInterval(interval);
-  }, [user]);
+    } catch (err) {
+      setNotifMsg("❌ Xatolik yuz berdi");
+      setShowNotif(true);
+      setTimeout(() => setShowNotif(false), 4000);
+    }
+  }
+
+  // 🔹 Premium holatini tekshirish: oyni oxirigacha amal qiladi
+  const isPremiumActive = () => {
+    if (!user?.premium?.isActive || !user?.premium?.endDate) return false;
+    const now = new Date();
+    const end = new Date(user.premium.endDate);
+    return now <= end;
+  };
 
   if (loading) return <div className="flex justify-center items-center h-screen">Yuklanmoqda...</div>;
 
@@ -138,7 +124,11 @@ export default function Home() {
             <div className="font-semibold text-lg">{user?.username || "Foydalanuvchi"}</div>
             <div className="text-xs text-gray-400">ID: {user?.tgId}</div>
             <div className="text-xs mt-1">
-              Premium: {user?.premium?.isActive ? "✅ Faol" : "❌ Faol emas"}
+              Premium holati: {isPremiumActive() ? (
+                <span className="text-green-400">✅ Faol — {new Date(user.premium.endDate).toLocaleDateString("uz-UZ")}</span>
+              ) : (
+                <span className="text-red-400">❌ Faol emas</span>
+              )}
             </div>
           </div>
         </div>
@@ -176,6 +166,7 @@ export default function Home() {
   );
 }
 
+// Oyni oxirigacha sanasi
 function getMonthEndISO() {
   const now = new Date();
   const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
