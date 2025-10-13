@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import HeroCard from "../components/HeroCard";
 import CountdownTimer from "../components/CountdownTimer";
+
 export default function Home() {
   const [user, setUser] = useState(null);
   const [theme, setTheme] = useState("default");
@@ -25,9 +26,6 @@ export default function Home() {
     }
   }, []);
 
-  const referralLink = "https://t.me/nft_userrbot?start=ref_12345";
-  const referralCount = 0;
-
   if (!user) return <div className="text-center pt-20">⏳ Yuklanmoqda...</div>;
 
   return (
@@ -51,7 +49,7 @@ export default function Home() {
       >
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-sm">Keyingi yutuq o‘yini</div>
+            <div className="text-sm text-gray-300">Keyingi yutuq o‘yini</div>
             <div
               className={`font-semibold text-lg ${
                 theme === "gold" ? "text-yellow-300" : "text-white"
@@ -62,10 +60,6 @@ export default function Home() {
           </div>
           <CountdownTimer targetDateISO={getMonthEndISO()} />
         </div>
-
-        <ProgressGoal current={premiumCount} goal={3000} />
-
-        <ReferralBox link={referralLink} count={referralCount} />
       </div>
     </main>
   );
