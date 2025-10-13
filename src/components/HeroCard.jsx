@@ -21,16 +21,16 @@ export default function HeroCard({ onSubscribe }) {
           </div>
           <div>
             <div className="text-sm text-yellow-300/80 font-medium tracking-wide">
-              Premium Lotereya
+             
             </div>
             <div className="text-lg font-semibold text-yellow-200">
-              Har oy avtomobil yutib olish imkoniyati
+              Har oy avtomobil va iPhone 17 yutib olish imkoniyati
             </div>
           </div>
         </div>
 
-        <h1 className="mt-5 text-3xl md:text-4xl font-extrabold leading-snug bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-200 bg-clip-text text-transparent">
-          🚘 Premium sotib oling va oylik avtomobil yutug‘ida qatnashing
+        <h1 className="mt-5 text-3xl md:text-4xl font-extrabold leading-snug bg-gradient-to-r from-yellow-300 via-yellow-300 to-yellow-200 bg-clip-text text-transparent">
+          🚘 Premium sotib oling va oylik avtomobil va iPhone 17 va boshqa sovg'alar o'yinida  qatnashing
         </h1>
 
        
