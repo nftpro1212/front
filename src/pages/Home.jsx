@@ -49,7 +49,7 @@ export default function Home() {
       >
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-sm text-gray-300">Keyingi yutuq o‘yini</div>
+            <div className="text-sm text-gray-300">Keyingi o‘yin</div>
             <div
               className={`font-semibold text-lg ${
                 theme === "gold" ? "text-yellow-300" : "text-white"
