@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Copy, Users } from "lucide-react";
+import { Copy, Users, Gift } from "lucide-react";
 import API from "../api/axiosInstance";
+import { motion } from "framer-motion";
 
 export default function ReferralBox({ link }) {
   const [copied, setCopied] = useState(false);
   const [count, setCount] = useState(0);
 
-  // 🔹 Referral sonini olish
   useEffect(() => {
     const fetchReferralCount = async () => {
       try {
@@ -16,11 +16,9 @@ export default function ReferralBox({ link }) {
         console.error("❌ Referral count olishda xato:", error);
       }
     };
-
     fetchReferralCount();
   }, []);
 
-  // 🔹 Havolani nusxalash funksiyasi
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(link);
@@ -32,29 +30,42 @@ export default function ReferralBox({ link }) {
   };
 
   return (
-    <div className="glass p-4 rounded-2xl">
-      <h2 className="text-lg font-semibold mb-2">👥 Do‘stlarni taklif qil</h2>
+    <motion.div
+      className="relative p-6 rounded-3xl overflow-hidden bg-gradient-to-br from-yellow-900/40 via-black/80 to-yellow-800/30 border border-yellow-500/30 shadow-[0_0_25px_rgba(255,215,0,0.2)] backdrop-blur-md"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      {/* Yorqin fon bezak */}
+      <div className="absolute inset-0 bg-gradient-to-t from-yellow-400/10 to-transparent blur-2xl pointer-events-none" />
 
-      <div className="flex items-center justify-between gap-2 bg-gray-900/50 border border-gray-800 p-2 rounded-xl">
-        <span className="text-xs truncate text-gray-300">{link}</span>
-        <button
-          onClick={copyLink}
-          className="p-2 rounded-lg bg-cyan-600 hover:bg-cyan-700 transition flex items-center gap-1 text-sm"
-        >
-          <Copy size={16} />
-          {copied ? "Nusxalandi" : "Kopiyalash"}
-        </button>
+      <div className="relative z-10">
+        <h2 className="text-xl font-bold mb-3 bg-gradient-to-r from-yellow-300 to-yellow-500 bg-clip-text text-transparent flex items-center gap-2">
+          <Gift size={22} /> Do‘stlarni taklif qil
+        </h2>
+
+        <div className="flex items-center justify-between gap-3 bg-black/50 border border-yellow-500/20 p-3 rounded-2xl shadow-inner">
+          <span className="text-sm truncate text-yellow-100">{link}</span>
+          <motion.button
+            onClick={copyLink}
+            whileTap={{ scale: 0.9 }}
+            className="p-2 px-3 rounded-xl bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 transition text-black font-medium flex items-center gap-2"
+          >
+            <Copy size={16} />
+            {copied ? "Nusxalandi!" : "Kopiyalash"}
+          </motion.button>
+        </div>
+
+        <div className="flex items-center gap-2 mt-5 text-yellow-200 text-sm">
+          <Users size={20} className="text-yellow-400" />
+          Siz taklif qilganlar soni:{" "}
+          <span className="text-yellow-400 font-semibold text-lg">{count}</span>
+        </div>
+
+        <p className="text-xs text-yellow-100/70 mt-3">
+          Har bir yangi foydalanuvchi sizning havolangiz orqali ro‘yxatdan o‘tsa, siz mukofot ballari olasiz 🎁
+        </p>
       </div>
-
-      <div className="flex items-center gap-2 mt-4 text-gray-300 text-sm">
-        <Users size={18} className="text-cyan-400" />
-        Siz taklif qilganlar soni:{" "}
-        <span className="text-cyan-400 font-semibold">{count}</span>
-      </div>
-
-      <p className="text-xs text-gray-500 mt-2">
-        Har bir yangi foydalanuvchi sizning havolangiz orqali ro‘yxatdan o‘tsa, siz mukofot ballari olasiz 🎁
-      </p>
-    </div>
+    </motion.div>
   );
 }
