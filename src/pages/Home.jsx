@@ -55,7 +55,7 @@ export default function Home() {
                 theme === "gold" ? "text-yellow-300" : "text-white"
               }`}
             >
-              Oy yakuni avtomobil sovrini
+              
             </div>
           </div>
           <CountdownTimer targetDateISO={getMonthEndISO()} />
