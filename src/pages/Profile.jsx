@@ -65,11 +65,7 @@ export default function Profile() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#000000] text-white px-4 py-10 md:py-16">
       <div className="max-w-2xl mx-auto space-y-8">
-        {/* Sarlavha */}
-        <h1 className="text-3xl md:text-4xl font-extrabold text-center text-yellow-400 drop-shadow-[0_0_8px_rgba(255,215,0,0.6)]">
-          👤 Profil Sahifasi
-        </h1>
-
+       
         {/* Foydalanuvchi ma’lumotlari */}
         <div className="relative glassy p-5 rounded-2xl bg-white/5 backdrop-blur-md border border-yellow-400/20 shadow-[0_0_20px_rgba(255,215,0,0.15)]">
           <div className="flex items-center gap-4">
