@@ -30,13 +30,10 @@ export default function HeroCard({ onSubscribe }) {
         </div>
 
         <h1 className="mt-5 text-3xl md:text-4xl font-extrabold leading-snug bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-200 bg-clip-text text-transparent">
-          🚘 Premiumga o‘ting va oylik avtomobil yutug‘ida qatnashing
+          🚘 Premium sotib oling va oylik avtomobil yutug‘ida qatnashing
         </h1>
 
-        <p className="mt-4 text-sm text-yellow-100/90 leading-relaxed">
-          Istalgan vaqtda obuna bo‘ling — obunangiz joriy kalendar oy oxirigacha amal qiladi. 
-          Do‘stlarni taklif qiling va yutish imkoniyatingizni oshiring! ✨
-        </p>
+       
 
         <div className="mt-6 flex flex-wrap gap-3">
           <motion.button
@@ -45,17 +42,13 @@ export default function HeroCard({ onSubscribe }) {
             onClick={onSubscribe}
             className="px-6 py-3 rounded-full font-bold text-black bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 shadow-[0_0_20px_rgba(255,215,0,0.4)] hover:from-yellow-400 hover:to-yellow-600 transition-all"
           >
-            Obuna bo‘lish $9.99
+            Obuna bo‘lish 100.000 so'm
           </motion.button>
-
-          <button className="flex items-center gap-2 px-5 py-3 rounded-full border border-yellow-400/30 text-yellow-300 hover:bg-yellow-400/10 transition">
-            <Info size={18} /> Qanday ishlaydi?
-          </button>
         </div>
 
         <div className="mt-5 flex items-center gap-2 text-xs text-yellow-200/80">
           <ShieldCheck size={14} className="text-yellow-400" />
-          <span>To‘lov xavfsiz & Telegram tasdiqlangan • 30 kunlik davr</span>
+       
         </div>
       </div>
 
