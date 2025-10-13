@@ -42,3 +42,17 @@ body {
 /* hide scrollbar niceness for horizontal carousels */
 .no-scrollbar::-webkit-scrollbar { display: none }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.gold-theme {
+  background: radial-gradient(circle at top, #ffefb1 0%, #2b2000 100%);
+  color: #fff9e6;
+}
+
+.gold-theme button {
+  background: linear-gradient(to right, #ffd700, #ffb300);
+  color: black !important;
+}
+
+.gold-theme .glass {
+  background: rgba(255, 215, 0, 0.08);
+  border-color: rgba(255, 215, 0, 0.3);
+}
