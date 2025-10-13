@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import confetti from "canvas-confetti";
 import WinnersCarousel from "../components/WinnersCarousel";
+import { Sparkles } from "lucide-react";
 
 export default function Rewards() {
   const canvasRef = useRef(null);
@@ -8,9 +9,8 @@ export default function Rewards() {
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState("");
 
-  // 🎁 Sovgalar va ularning ehtimollari (toifalarga qarab)
   const prizes = [
-    { name: "Omadsiz 😢", probability: 0.70, color: "#E57373" },
+    { name: "Omadsiz 😢", probability: 0.7, color: "#FF4D4D" },
     { name: "5 000 so‘m", probability: 0.1, color: "#FFB74D" },
     { name: "10 000 so‘m", probability: 0.1, color: "#81C784" },
     { name: "20 000 so‘m", probability: 0.08, color: "#64B5F6" },
@@ -18,17 +18,16 @@ export default function Rewards() {
     { name: "100 000 so‘m", probability: 0.009, color: "#8BC34A" },
     { name: "Naushnik", probability: 0.03, color: "#BA68C8" },
     { name: "Smart-soat", probability: 0.02, color: "#F06292" },
-    { name: "Powerbank", probability: 0.010, color: "#26C6DA" },
+    { name: "Powerbank", probability: 0.01, color: "#26C6DA" },
     { name: "Qo‘l soati", probability: 0.01, color: "#FF8A65" },
     { name: "Planshet", probability: 0.007, color: "#9575CD" },
-    { name: "Noutbuk", probability: 0.005, color: "#64B5F6" },
-    { name: "iPhone 17 Pro Max", probability: 0.003, color: "#FFD700" }, // eng kam ehtimol
+    { name: "Noutbuk", probability: 0.005, color: "#42A5F5" },
+    { name: "iPhone 17 Pro Max", probability: 0.003, color: "#FFD700" },
   ];
 
   const SEGMENTS = prizes.length;
   const SEGMENT_DEG = 360 / SEGMENTS;
 
-  // 🎨 Rulet chizish funksiyasi
   const drawWheel = (angleOffsetRad = 0) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -41,7 +40,7 @@ export default function Rewards() {
     canvas.style.width = `${cssSize}px`;
     canvas.style.height = `${cssSize}px`;
 
-    const center = (canvas.width / 2);
+    const center = canvas.width / 2;
     const radius = center * 0.95;
     const arc = (2 * Math.PI) / SEGMENTS;
 
@@ -51,35 +50,33 @@ export default function Rewards() {
       const start = angleOffsetRad + i * arc;
       const end = start + arc;
 
-      // sektor
       ctx.beginPath();
       ctx.moveTo(center, center);
       ctx.arc(center, center, radius, start, end);
       ctx.closePath();
-      ctx.fillStyle = prizes[i].color;
+
+      const gradient = ctx.createRadialGradient(center, center, 0, center, center, radius);
+      gradient.addColorStop(0, "#111");
+      gradient.addColorStop(1, prizes[i].color);
+      ctx.fillStyle = gradient;
       ctx.fill();
 
-      // matn
       const labelAngle = start + arc / 2;
       ctx.save();
       ctx.translate(center, center);
       ctx.rotate(labelAngle);
-      const textRadius = radius * 0.7;
       ctx.fillStyle = "#fff";
       ctx.font = `${13 * dpr}px Poppins, sans-serif`;
       ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(prizes[i].name, textRadius, 0);
+      ctx.fillText(prizes[i].name, radius * 0.68, 0);
       ctx.restore();
     }
 
-    // markazdagi doira
     ctx.beginPath();
     ctx.arc(center, center, radius * 0.22, 0, Math.PI * 2);
     ctx.fillStyle = "rgba(255,255,255,0.1)";
     ctx.fill();
 
-    // strelka
     ctx.save();
     ctx.translate(center, center);
     ctx.beginPath();
@@ -102,7 +99,6 @@ export default function Rewards() {
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  // 🎯 Tasodifiy sovg‘a tanlash ehtimol asosida
   const getRandomPrizeIndex = () => {
     const random = Math.random();
     let cumulative = 0;
@@ -119,11 +115,9 @@ export default function Rewards() {
     setResult("");
 
     const chosenIndex = getRandomPrizeIndex();
-
     const spins = 6 + Math.floor(Math.random() * 2);
-    const targetDeg = 270; // strelka yuqorida
-    const alignDeg =
-      ((targetDeg - (chosenIndex + 0.5) * SEGMENT_DEG) % 360 + 360) % 360;
+    const targetDeg = 270;
+    const alignDeg = ((targetDeg - (chosenIndex + 0.5) * SEGMENT_DEG) % 360 + 360) % 360;
     const totalRotationDeg = spins * 360 + alignDeg;
     const totalRotationRad = (totalRotationDeg * Math.PI) / 180;
 
@@ -143,35 +137,21 @@ export default function Rewards() {
         setSpinning(false);
         const prize = prizes[chosenIndex].name;
 
-        // 🎆 Confetti effekti
-        if (prize === "iPhone 17 Pro Max") {
-          for (let i = 0; i < 5; i++) {
-            setTimeout(() => {
-              confetti({
-                particleCount: 200,
-                spread: 150,
-                origin: { y: 0.6 },
-                colors: ["#FFD700", "#FF69B4", "#00C853"],
-              });
-            }, i * 400);
-          }
-        } else if (prize !== "Omadsiz 😢") {
+        // 🎇 Confetti
+        if (prize !== "Omadsiz 😢") {
           confetti({
-            particleCount: 150,
-            spread: 100,
+            particleCount: 200,
+            spread: 120,
             origin: { y: 0.7 },
-            colors: ["#FFD700", "#FF69B4", "#4CAF50", "#64B5F6"],
+            colors: ["#FFD700", "#64B5F6", "#FF69B4", "#4CAF50"],
           });
         }
 
-        // 🏁 Natijani chiqarish
-        if (prize === "Omadsiz 😢") {
-          setResult("😔 Afsus, bu safar omad sizdan uzoq...");
-        } else if (prize === "iPhone 17 Pro Max") {
-          setResult(`🏆 Super omad! Siz "${prize}" yutdingiz! 🎉`);
-        } else {
-          setResult(`🎁 Siz "${prize}" sovg‘asini yutdingiz!`);
-        }
+        setResult(
+          prize === "Omadsiz 😢"
+            ? "😔 Afsus, bu safar omad sizdan uzoq..."
+            : `🎉 Siz "${prize}" sovg‘asini yutdingiz!`
+        );
       }
     };
 
@@ -183,35 +163,49 @@ export default function Rewards() {
   }, []);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pt-8 pb-24 space-y-6 text-center text-white">
-      <h1 className="text-3xl font-bold">🎯 Sovg‘alar Ruleti</h1>
+    <div className="max-w-2xl mx-auto px-4 pt-10 pb-24 text-center text-white space-y-8">
+      <div className="flex justify-center items-center gap-2">
+        <Sparkles className="w-6 h-6 text-cyan-400" />
+        <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-500">
+          Sovg‘alar Ruleti
+        </h1>
+      </div>
+
       <p className="text-sm text-gray-300">
-        Aylantiring va omad sinang — faqat 0.3% ehtimol bilan iPhone 17 Pro Max!
+        Omad sinang — faqat 0.3% ehtimol bilan <b>iPhone 17 Pro Max</b> sizniki bo‘lishi mumkin!
       </p>
 
-      <div className="flex flex-col items-center gap-4">
-        <canvas
-          ref={canvasRef}
-          width={420}
-          height={420}
-          className="rounded-full shadow-2xl"
-          style={{ width: 420, height: 420 }}
-        />
+      <div className="flex flex-col items-center gap-6">
+        <div className="relative">
+          <canvas
+            ref={canvasRef}
+            width={420}
+            height={420}
+            className={`rounded-full shadow-[0_0_40px_rgba(0,255,255,0.2)] transition-all ${
+              spinning ? "scale-95 opacity-80" : "scale-100"
+            }`}
+          />
+          <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-cyan-500/10 to-purple-600/10 blur-2xl" />
+        </div>
 
         <button
           onClick={spinWheel}
           disabled={spinning}
-          className={`px-8 py-3 rounded-full font-semibold shadow-lg transition-transform
+          className={`px-10 py-3 text-lg font-semibold rounded-full shadow-lg text-white transition-all
             ${spinning
               ? "bg-gray-600 cursor-not-allowed"
-              : "bg-gradient-to-r from-cyan-500 to-purple-600 hover:scale-105"}
-            text-white`}
+              : "bg-gradient-to-r from-cyan-500 to-purple-600 hover:scale-105 hover:shadow-cyan-500/40"}
+          `}
         >
-          {spinning ? "Aylanmoqda..." : "Aylantirish"}
+          {spinning ? "Aylanmoqda..." : "Aylantirish 🎯"}
         </button>
 
         {result && (
-          <div className="mt-3 text-lg font-semibold text-yellow-300 transition-all">
+          <div
+            className={`text-lg font-semibold mt-4 transition-all ${
+              result.includes("yutdingiz") ? "text-green-400 animate-pulse" : "text-gray-400"
+            }`}
+          >
             {result}
           </div>
         )}
