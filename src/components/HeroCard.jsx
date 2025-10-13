@@ -29,9 +29,9 @@ export default function HeroCard({ onSubscribe }) {
           </div>
         </div>
 
-        <h1 className="mt-5 text-3xl md:text-4xl font-extrabold leading-snug bg-gradient-to-r from-yellow-300 via-yellow-300 to-yellow-200 bg-clip-text text-transparent">
+        <div className="mt-5 text-3xl md:text-4xl font-extrabold leading-snug bg-gradient-to-r from-yellow-300 via-yellow-300 to-yellow-200 bg-clip-text text-transparent">
           🚘 Premium sotib oling va oylik avtomobil va iPhone 17 va boshqa sovg'alar o'yinida  qatnashing
-        </h1>
+        </div>
 
        
 
