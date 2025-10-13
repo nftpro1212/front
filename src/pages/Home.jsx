@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
 import HeroCard from "../components/HeroCard";
 import CountdownTimer from "../components/CountdownTimer";
-import ProgressGoal from "../components/ProgressGoal";
-import ReferralBox from "../components/ReferralBox";
-
 export default function Home() {
   const [user, setUser] = useState(null);
   const [theme, setTheme] = useState("default");
