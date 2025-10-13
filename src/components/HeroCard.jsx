@@ -1,81 +1,74 @@
 import React from "react";
 import { motion } from "framer-motion";
+import { Crown, Info, ShieldCheck } from "lucide-react";
 
-export default function HeroCard({ onSubscribe, isPremium }) {
+export default function HeroCard({ onSubscribe }) {
   return (
-    <motion.div 
-      initial={{ opacity: 0, y: 8 }} 
-      animate={{ opacity: 1, y: 0 }} 
-      className={`rounded-2xl p-5 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-4 items-center shadow-lg transition-all duration-500 ${
-        isPremium 
-          ? "bg-gradient-to-br from-yellow-300/20 via-yellow-400/10 to-yellow-500/20 border border-yellow-400/30 text-yellow-100" 
-          : "glass text-white"
-      }`}
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="relative overflow-hidden rounded-3xl p-8 grid grid-cols-1 md:grid-cols-2 gap-6 items-center border border-yellow-400/30 bg-gradient-to-br from-black/80 via-yellow-900/10 to-black/90 shadow-[0_0_40px_rgba(255,215,0,0.15)] backdrop-blur-xl"
     >
-      <div>
+      {/* 🔹 Gold aura background */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-yellow-600/10 via-transparent to-yellow-400/5 blur-2xl pointer-events-none" />
+
+      {/* 🔹 Left Side */}
+      <div className="relative z-10 text-yellow-50">
         <div className="flex items-center gap-3">
-          <div className={`rounded-lg w-12 h-12 flex items-center justify-center font-bold text-xl ${
-            isPremium ? "bg-yellow-500 text-black shadow-yellow-300" : "btn-neon"
-          }`}>
-            {isPremium ? "G★" : "ST"}
+          <div className="rounded-xl bg-gradient-to-br from-yellow-400 to-yellow-600 w-12 h-12 flex items-center justify-center font-extrabold text-black shadow-[0_0_15px_rgba(255,215,0,0.5)]">
+            <Crown size={24} />
           </div>
           <div>
-            <div className="text-sm small">
-              {isPremium ? "Gold Premium Foydalanuvchi" : "Premium Lotereya"}
+            <div className="text-sm text-yellow-300/80 font-medium tracking-wide">
+              Premium Lotereya
             </div>
-            <div className="text-lg font-semibold">
-              {isPremium 
-                ? "🎉 Siz hozirda Premium (Gold) foydalanuvchisiz!" 
-                : "Har oy avtomobil yutib olish imkoniyati"}
+            <div className="text-lg font-semibold text-yellow-200">
+              Har oy avtomobil yutib olish imkoniyati
             </div>
           </div>
         </div>
 
-        <h1 className={`mt-4 text-2xl md:text-3xl font-extrabold ${
-          isPremium ? "text-yellow-300 drop-shadow-lg" : ""
-        }`}>
-          {isPremium
-            ? "🚘 Siz Gold versiyadasiz — omad siz bilan bo‘lsin!"
-            : "🚘 Premiumga o‘ting va oylik avtomobil yutug‘ida qatnashing"}
+        <h1 className="mt-5 text-3xl md:text-4xl font-extrabold leading-snug bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-200 bg-clip-text text-transparent">
+          🚘 Premiumga o‘ting va oylik avtomobil yutug‘ida qatnashing
         </h1>
 
-        <p className="mt-3 small">
-          {isPremium
-            ? "Obunangiz joriy oy oxirigacha amal qiladi. Har oyda avtomatik yangilanadi va maxsus sovrinlar uchun sizga ustunlik beradi."
-            : "Istalgan vaqtda obuna bo‘ling — obunangiz joriy kalendar oy oxirigacha amal qiladi. Do‘stlarni taklif qiling va imkoniyatlaringizni oshiring."}
+        <p className="mt-4 text-sm text-yellow-100/90 leading-relaxed">
+          Istalgan vaqtda obuna bo‘ling — obunangiz joriy kalendar oy oxirigacha amal qiladi. 
+          Do‘stlarni taklif qiling va yutish imkoniyatingizni oshiring! ✨
         </p>
 
-        {!isPremium && (
-          <div className="mt-5 flex gap-3">
-            <button 
-              onClick={onSubscribe} 
-              className="btn-neon text-white px-5 py-3 rounded-xl font-semibold shadow-lg"
-            >
-              Obuna bo‘lish $9.99
-            </button>
-            <button className="bg-white/6 border border-white/6 text-white px-4 py-3 rounded-xl">
-              Qanday ishlaydi?
-            </button>
-          </div>
-        )}
+        <div className="mt-6 flex flex-wrap gap-3">
+          <motion.button
+            whileHover={{ scale: 1.08, boxShadow: "0 0 25px rgba(255,215,0,0.7)" }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onSubscribe}
+            className="px-6 py-3 rounded-full font-bold text-black bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 shadow-[0_0_20px_rgba(255,215,0,0.4)] hover:from-yellow-400 hover:to-yellow-600 transition-all"
+          >
+            Obuna bo‘lish $9.99
+          </motion.button>
 
-        <div className="mt-4 text-xs small opacity-80">
-          {isPremium 
-            ? "🌟 Telegram orqali tasdiqlangan Premium holat • Oylik Gold status" 
-            : "Xavfsiz to‘lov & Telegram tasdiqlangan • 30 kunlik davr"}
+          <button className="flex items-center gap-2 px-5 py-3 rounded-full border border-yellow-400/30 text-yellow-300 hover:bg-yellow-400/10 transition">
+            <Info size={18} /> Qanday ishlaydi?
+          </button>
+        </div>
+
+        <div className="mt-5 flex items-center gap-2 text-xs text-yellow-200/80">
+          <ShieldCheck size={14} className="text-yellow-400" />
+          <span>To‘lov xavfsiz & Telegram tasdiqlangan • 30 kunlik davr</span>
         </div>
       </div>
 
-      <div className="flex items-center justify-center">
-        <div className="w-full max-w-sm">
-          <img 
-            src={isPremium ? "/gold-car.png" : "/car-illustration.png"} 
-            alt="Avtomobil" 
-            className={`w-full object-contain drop-shadow-xl ${
-              isPremium ? "animate-pulse" : ""
-            }`} 
-          />
-        </div>
+      {/* 🔹 Right Side — illustration */}
+      <div className="relative z-10 flex justify-center items-center">
+        <motion.img
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+          src="/car-illustration.png"
+          alt="Avtomobil"
+          className="w-full max-w-sm object-contain drop-shadow-[0_0_30px_rgba(255,215,0,0.3)]"
+        />
       </div>
     </motion.div>
   );
