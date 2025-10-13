@@ -3,7 +3,6 @@ import HeroCard from "../components/HeroCard";
 import CountdownTimer from "../components/CountdownTimer";
 import ProgressGoal from "../components/ProgressGoal";
 import ReferralBox from "../components/ReferralBox";
-import WinnersCarousel from "../components/WinnersCarousel";
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -11,10 +10,6 @@ export default function Home() {
   const [referralCount, setReferralCount] = useState(0);
 
   const premiumCount = 1842;
-  const winners = [
-    { name: "Jasur", prize: "BMW 5 Series", avatar: "/avatar1.jpg", note: "1-oktabr g'olibi" },
-    { name: "Madina", prize: "iPhone 15", avatar: "/avatar2.jpg", note: "27-sentabr g'olibi" },
-  ];
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
@@ -87,55 +82,20 @@ export default function Home() {
       {/* 🔹 Premium karta */}
       <HeroCard />
 
-      {/* 🔹 Foydalanuvchi ma’lumotlari */}
-      <div className="glass p-4 rounded-2xl">
-        <div className="flex items-center gap-3">
-          <img
-            src={user?.avatar || "/avatar-placeholder.png"}
-            alt="avatar"
-            className="w-12 h-12 rounded-full border border-white/10"
-          />
+      {/* 🔹 Taymer va progress + referal bo‘lim */}
+      <div className="glass p-4 rounded-2xl space-y-4">
+        <div className="flex items-center justify-between">
           <div>
-            <div className="font-semibold text-lg">{user?.username || "Foydalanuvchi"}</div>
-            <div className="text-xs text-gray-400">ID: {user?.tgId}</div>
-            <div className="text-xs mt-1">
-              Premium holati:{" "}
-              {isPremiumActive() ? (
-                <span className="text-green-400">
-                  ✅ Faol — {new Date(user.premium.endDate).toLocaleDateString("uz-UZ")}
-                </span>
-              ) : (
-                <span className="text-red-400">❌ Faol emas</span>
-              )}
-            </div>
+            <div className="text-sm">Keyingi yutuq o‘yini</div>
+            <div className="font-semibold text-lg">Oy yakuni avtomobil sovrini</div>
           </div>
-        </div>
-      </div>
-
-      {/* 🔹 Asosiy bo‘limlar */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-4">
-          {/* Taymer va progress */}
-          <div className="glass p-4 rounded-2xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm">Keyingi yutuq o‘yini</div>
-                <div className="font-semibold text-lg">Oy yakuni avtomobil sovrini</div>
-              </div>
-              <CountdownTimer targetDateISO={getMonthEndISO()} />
-            </div>
-            <div className="mt-4">
-              <ProgressGoal current={premiumCount} goal={3000} />
-            </div>
-          </div>
-
-          {/* Referal bo‘lim */}
-          <ReferralBox link={referralLink} count={referralCount} />
+          <CountdownTimer targetDateISO={getMonthEndISO()} />
         </div>
 
-        <div>
-          <WinnersCarousel winners={winners} />
-        </div>
+        <ProgressGoal current={premiumCount} goal={3000} />
+
+        {/* Referal bo‘lim */}
+        <ReferralBox link={referralLink} count={referralCount} />
       </div>
     </main>
   );
