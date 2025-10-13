@@ -14,6 +14,7 @@ export default function Home() {
   const [notifMsg, setNotifMsg] = useState("");
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [referralCount, setReferralCount] = useState(0);
 
   const premiumCount = 1842;
   const winners = [
@@ -30,32 +31,38 @@ export default function Home() {
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
 
+    const urlParams = new URLSearchParams(window.location.search);
+    const referralCode = urlParams.get("start"); // ?start=ref_xxxxxx
+
     if (tg?.initDataUnsafe?.user) {
       const telegramUser = tg.initDataUnsafe.user;
-      loginOrRegister(telegramUser);
+      loginOrRegister(telegramUser, referralCode);
     } else {
       const storedUser = localStorage.getItem("user");
       if (storedUser) {
-        setUser(JSON.parse(storedUser));
+        const parsed = JSON.parse(storedUser);
+        setUser(parsed);
+        fetchReferralCount(parsed.tgId);
         setLoading(false);
       } else {
-        // Test rejimi
-        loginOrRegister({ id: 9999, username: "test_user" });
+        // Test rejimi (faqat dev uchun)
+        loginOrRegister({ id: 9999, username: "test_user" }, referralCode);
       }
     }
   }, []);
 
   // 🔹 Login yoki Register
-  const loginOrRegister = async (telegramUser) => {
+  const loginOrRegister = async (telegramUser, referralCode) => {
     try {
       const response = await fetch("https://backend-m6u1.onrender.com/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tgId: telegramUser.id,
+          tgId: String(telegramUser.id),
           username: telegramUser.username || "no_username",
           first_name: telegramUser.first_name,
           last_name: telegramUser.last_name,
+          referralCode,
         }),
       });
 
@@ -64,6 +71,7 @@ export default function Home() {
       if (data.success) {
         setUser(data.user);
         localStorage.setItem("user", JSON.stringify(data.user));
+        fetchReferralCount(data.user.tgId);
       } else {
         console.error("Login muvaffaqiyatsiz:", data.message);
       }
@@ -74,7 +82,22 @@ export default function Home() {
     }
   };
 
-  // 💳 Premium sotib olish - sotuvchi sahifasiga yo'naltirish
+  // 🔹 Referral count-ni olish
+  const fetchReferralCount = async (tgId) => {
+    if (!tgId) return;
+    try {
+      const res = await fetch(
+        `https://backend-m6u1.onrender.com/api/referrals/count?telegramId=${tgId}`
+      );
+      const data = await res.json();
+      if (data.success) setReferralCount(data.count);
+      else console.warn("Referral count xato:", data.message);
+    } catch (err) {
+      console.error("Referral count olishda xato:", err);
+    }
+  };
+
+  // 💳 Premium sotib olish
   async function handleSubscribe() {
     if (!user) return;
 
@@ -83,12 +106,9 @@ export default function Home() {
       const paymentUrl = `https://your-seller-page.com/pay?tgId=${user.tgId}`;
       window.open(paymentUrl, "_blank");
 
-      // 2️⃣ Backend orqali premiumni tasdiqlash (sotuvchi tomonidan)
-      // Bu qadam sotuvchi tasdiqlagandan keyin amalga oshadi
       setNotifMsg("💡 Sotuvchiga yo‘naltirildi. To‘lov tasdiqlangandan keyin Premium faollashadi.");
       setShowNotif(true);
       setTimeout(() => setShowNotif(false), 5000);
-
     } catch (err) {
       setNotifMsg("❌ Xatolik yuz berdi");
       setShowNotif(true);
@@ -96,7 +116,7 @@ export default function Home() {
     }
   }
 
-  // 🔹 Premium holatini tekshirish: oyni oxirigacha amal qiladi
+  // 🔹 Premium holatini tekshirish (oy oxirigacha)
   const isPremiumActive = () => {
     if (!user?.premium?.isActive || !user?.premium?.endDate) return false;
     const now = new Date();
@@ -104,19 +124,21 @@ export default function Home() {
     return now <= end;
   };
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Yuklanmoqda...</div>;
+  if (loading)
+    return <div className="flex justify-center items-center h-screen">Yuklanmoqda...</div>;
 
-  const referralLink = `https://t.me/YourBot?start=${user?.referralCode || "ref_12345"}`;
+  const referralLink = `https://t.me/nft_userrbot?start=${user?.referralCode || "ref_12345"}`;
 
   return (
     <main className="max-w-2xl mx-auto px-4 pt-6 pb-32 space-y-6">
       <NotificationBanner show={showNotif} message={notifMsg} />
       <HeroCard onSubscribe={handleSubscribe} />
 
+      {/* 🔹 Foydalanuvchi ma'lumotlari */}
       <div className="glass p-4 rounded-2xl mb-4">
         <div className="flex items-center gap-3">
           <img
-            src={user?.photoUrl || "/avatar-placeholder.png"}
+            src={user?.avatar || "/avatar-placeholder.png"}
             alt="avatar"
             className="w-12 h-12 rounded-full border border-white/10"
           />
@@ -124,8 +146,11 @@ export default function Home() {
             <div className="font-semibold text-lg">{user?.username || "Foydalanuvchi"}</div>
             <div className="text-xs text-gray-400">ID: {user?.tgId}</div>
             <div className="text-xs mt-1">
-              Premium holati: {isPremiumActive() ? (
-                <span className="text-green-400">✅ Faol — {new Date(user.premium.endDate).toLocaleDateString("uz-UZ")}</span>
+              Premium holati:{" "}
+              {isPremiumActive() ? (
+                <span className="text-green-400">
+                  ✅ Faol — {new Date(user.premium.endDate).toLocaleDateString("uz-UZ")}
+                </span>
               ) : (
                 <span className="text-red-400">❌ Faol emas</span>
               )}
@@ -134,8 +159,10 @@ export default function Home() {
         </div>
       </div>
 
+      {/* 🔹 Asosiy bloklar */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-4">
+          {/* O'yin va progress */}
           <div className="glass p-4 rounded-2xl">
             <div className="flex items-center justify-between">
               <div>
@@ -151,7 +178,8 @@ export default function Home() {
             </div>
           </div>
 
-          <ReferralBox link={referralLink} />
+          {/* Referral */}
+          <ReferralBox link={referralLink} count={referralCount} />
         </div>
 
         <div className="space-y-4">
@@ -166,7 +194,7 @@ export default function Home() {
   );
 }
 
-// Oyni oxirigacha sanasi
+// 🔹 Oyni oxirigacha sanasi
 function getMonthEndISO() {
   const now = new Date();
   const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
