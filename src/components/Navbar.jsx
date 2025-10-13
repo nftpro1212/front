@@ -11,24 +11,41 @@ const Navbar = () => {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-gray-900 text-white flex justify-around items-center py-2 border-t border-gray-700 z-50">
+    <div className="fixed bottom-0 left-0 w-full bg-gradient-to-br from-yellow-700/20 via-yellow-800/30 to-yellow-900/40 backdrop-blur-lg border-t border-yellow-500/20 shadow-[0_0_25px_rgba(255,215,0,0.25)] flex justify-around items-center py-2 z-50">
       {navItems.map((item) => (
         <NavLink
           key={item.to}
           to={item.to}
           className={({ isActive }) =>
-            `relative flex flex-col items-center transition-all duration-200 ${
-              isActive ? "text-cyan-400" : "text-gray-400 hover:text-cyan-300"
+            `relative flex flex-col items-center transition-all duration-300 ease-in-out ${
+              isActive
+                ? "text-yellow-400 scale-110 drop-shadow-[0_0_8px_rgba(255,215,0,0.6)]"
+                : "text-gray-400 hover:text-yellow-300 hover:scale-105"
             }`
           }
         >
-          {item.icon}
-          <span className="text-[11px] mt-1">{item.label}</span>
-          {({ isActive }) =>
-            isActive && (
-              <span className="absolute bottom-0 h-1 w-6 bg-cyan-400 rounded-full"></span>
-            )
-          }
+          <div className="relative">
+            {item.icon}
+            {/* 🔹 Active glow circle */}
+            <div
+              className={`absolute inset-0 rounded-full blur-md transition-all duration-300 ${
+                location.pathname === item.to
+                  ? "bg-yellow-400/40 scale-150"
+                  : "scale-0"
+              }`}
+            ></div>
+          </div>
+          <span className="text-[11px] mt-1 font-medium tracking-wide">
+            {item.label}
+          </span>
+          {/* 🔸 Active gold line indicator */}
+          <div
+            className={`absolute bottom-0 h-[3px] w-8 rounded-full transition-all duration-300 ${
+              location.pathname === item.to
+                ? "bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 shadow-[0_0_8px_rgba(255,215,0,0.6)]"
+                : "opacity-0"
+            }`}
+          ></div>
         </NavLink>
       ))}
     </div>
