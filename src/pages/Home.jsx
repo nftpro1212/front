@@ -4,14 +4,8 @@ import CountdownTimer from "../components/CountdownTimer";
 import ProgressGoal from "../components/ProgressGoal";
 import ReferralBox from "../components/ReferralBox";
 import WinnersCarousel from "../components/WinnersCarousel";
-import BenefitsGrid from "../components/BenefitsGrid";
-import LiveFeed from "../components/LiveFeed";
-import FAQAccordion from "../components/FAQAccordion";
-import NotificationBanner from "../components/NotificationBanner";
 
 export default function Home() {
-  const [showNotif, setShowNotif] = useState(false);
-  const [notifMsg, setNotifMsg] = useState("");
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [referralCount, setReferralCount] = useState(0);
@@ -21,16 +15,9 @@ export default function Home() {
     { name: "Jasur", prize: "BMW 5 Series", avatar: "/avatar1.jpg", note: "1-oktabr g'olibi" },
     { name: "Madina", prize: "iPhone 15", avatar: "/avatar2.jpg", note: "27-sentabr g'olibi" },
   ];
-  const events = [
-    "Dilshod premiumga o'tdi",
-    "Jasur 3 do'stini taklif qildi",
-    "Lola Gold darajaga chiqdi",
-  ];
 
-  // ✅ Telegram WebApp orqali foydalanuvchini olish
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
-
     const urlParams = new URLSearchParams(window.location.search);
     const referralCode = urlParams.get("start"); // ?start=ref_xxxxxx
 
@@ -38,20 +25,11 @@ export default function Home() {
       const telegramUser = tg.initDataUnsafe.user;
       loginOrRegister(telegramUser, referralCode);
     } else {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        const parsed = JSON.parse(storedUser);
-        setUser(parsed);
-        fetchReferralCount(parsed.tgId);
-        setLoading(false);
-      } else {
-        // Test rejimi (faqat dev uchun)
-        loginOrRegister({ id: 9999, username: "test_user" }, referralCode);
-      }
+      // Test rejimi
+      loginOrRegister({ id: 9999, username: "test_user" }, referralCode);
     }
   }, []);
 
-  // 🔹 Login yoki Register
   const loginOrRegister = async (telegramUser, referralCode) => {
     try {
       const response = await fetch("https://backend-m6u1.onrender.com/api/auth/login", {
@@ -67,10 +45,8 @@ export default function Home() {
       });
 
       const data = await response.json();
-
       if (data.success) {
         setUser(data.user);
-        localStorage.setItem("user", JSON.stringify(data.user));
         fetchReferralCount(data.user.tgId);
       } else {
         console.error("Login muvaffaqiyatsiz:", data.message);
@@ -82,41 +58,18 @@ export default function Home() {
     }
   };
 
-  // 🔹 Referral count-ni olish
   const fetchReferralCount = async (tgId) => {
-    if (!tgId) return;
     try {
       const res = await fetch(
         `https://backend-m6u1.onrender.com/api/referrals/count?telegramId=${tgId}`
       );
       const data = await res.json();
       if (data.success) setReferralCount(data.count);
-      else console.warn("Referral count xato:", data.message);
     } catch (err) {
       console.error("Referral count olishda xato:", err);
     }
   };
 
-  // 💳 Premium sotib olish
-  async function handleSubscribe() {
-    if (!user) return;
-
-    try {
-      // 1️⃣ Sotuvchi sahifasiga yo‘naltirish
-      const paymentUrl = `https://your-seller-page.com/pay?tgId=${user.tgId}`;
-      window.open(paymentUrl, "_blank");
-
-      setNotifMsg("💡 Sotuvchiga yo‘naltirildi. To‘lov tasdiqlangandan keyin Premium faollashadi.");
-      setShowNotif(true);
-      setTimeout(() => setShowNotif(false), 5000);
-    } catch (err) {
-      setNotifMsg("❌ Xatolik yuz berdi");
-      setShowNotif(true);
-      setTimeout(() => setShowNotif(false), 4000);
-    }
-  }
-
-  // 🔹 Premium holatini tekshirish (oy oxirigacha)
   const isPremiumActive = () => {
     if (!user?.premium?.isActive || !user?.premium?.endDate) return false;
     const now = new Date();
@@ -125,17 +78,17 @@ export default function Home() {
   };
 
   if (loading)
-    return <div className="flex justify-center items-center h-screen">Yuklanmoqda...</div>;
+    return <div className="flex justify-center items-center h-screen">⏳ Yuklanmoqda...</div>;
 
   const referralLink = `https://t.me/nft_userrbot?start=${user?.referralCode || "ref_12345"}`;
 
   return (
-    <main className="max-w-2xl mx-auto px-4 pt-6 pb-32 space-y-6">
-      <NotificationBanner show={showNotif} message={notifMsg} />
-      <HeroCard onSubscribe={handleSubscribe} />
+    <main className="max-w-2xl mx-auto px-4 pt-6 pb-20 space-y-6">
+      {/* 🔹 Premium karta */}
+      <HeroCard />
 
-      {/* 🔹 Foydalanuvchi ma'lumotlari */}
-      <div className="glass p-4 rounded-2xl mb-4">
+      {/* 🔹 Foydalanuvchi ma’lumotlari */}
+      <div className="glass p-4 rounded-2xl">
         <div className="flex items-center gap-3">
           <img
             src={user?.avatar || "/avatar-placeholder.png"}
@@ -159,37 +112,31 @@ export default function Home() {
         </div>
       </div>
 
-      {/* 🔹 Asosiy bloklar */}
+      {/* 🔹 Asosiy bo‘limlar */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-4">
-          {/* O'yin va progress */}
+          {/* Taymer va progress */}
           <div className="glass p-4 rounded-2xl">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm">Keyingi o‘yin</div>
-                <div className="font-semibold text-lg">Oy yakunidagi avtomobil yutug‘i</div>
+                <div className="text-sm">Keyingi yutuq o‘yini</div>
+                <div className="font-semibold text-lg">Oy yakuni avtomobil sovrini</div>
               </div>
-              <div>
-                <CountdownTimer targetDateISO={getMonthEndISO()} />
-              </div>
+              <CountdownTimer targetDateISO={getMonthEndISO()} />
             </div>
             <div className="mt-4">
               <ProgressGoal current={premiumCount} goal={3000} />
             </div>
           </div>
 
-          {/* Referral */}
+          {/* Referal bo‘lim */}
           <ReferralBox link={referralLink} count={referralCount} />
         </div>
 
-        <div className="space-y-4">
+        <div>
           <WinnersCarousel winners={winners} />
-          <BenefitsGrid />
-          <LiveFeed events={events} />
         </div>
       </div>
-
-      <FAQAccordion />
     </main>
   );
 }
