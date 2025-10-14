@@ -1,17 +1,19 @@
 import React, { useRef, useState, useEffect } from "react";
 import confetti from "canvas-confetti";
-import { Sparkles, Gift } from "lucide-react";
+import { Sparkles, Gift, Clock } from "lucide-react";
 import API from "../api/axiosInstance";
 
 export default function Rewards() {
   const canvasRef = useRef(null);
-  const rafRef = useRef(null);
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState("");
   const [saving, setSaving] = useState(false);
   const [history, setHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [spinLimitReached, setSpinLimitReached] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isPremium, setIsPremium] = useState(false);
+  const [remainingSpins, setRemainingSpins] = useState(1);
 
   const prizes = [
     { name: "Omadsiz 😢", probability: 0.7, color: "#5C4033" },
@@ -30,7 +32,6 @@ export default function Rewards() {
   const SEGMENTS = prizes.length;
   const SEGMENT_DEG = 360 / SEGMENTS;
 
-  // 🌀 Ruletni chizish
   const drawWheel = (angleOffsetRad = 0) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -51,16 +52,11 @@ export default function Rewards() {
     for (let i = 0; i < SEGMENTS; i++) {
       const start = angleOffsetRad + i * arc;
       const end = start + arc;
-
       ctx.beginPath();
       ctx.moveTo(center, center);
       ctx.arc(center, center, radius, start, end);
       ctx.closePath();
-
-      const gradient = ctx.createRadialGradient(center, center, 0, center, center, radius);
-      gradient.addColorStop(0, "#1a120b");
-      gradient.addColorStop(1, prizes[i].color);
-      ctx.fillStyle = gradient;
+      ctx.fillStyle = prizes[i].color;
       ctx.fill();
 
       const labelAngle = start + arc / 2;
@@ -88,8 +84,6 @@ export default function Rewards() {
     ctx.lineTo(arrowH / 2, -radius + arrowH / 2);
     ctx.closePath();
     ctx.fillStyle = "#FFD700";
-    ctx.shadowColor = "#FFD700";
-    ctx.shadowBlur = 10 * dpr;
     ctx.fill();
     ctx.restore();
   };
@@ -114,6 +108,16 @@ export default function Rewards() {
       const userId = tg?.initDataUnsafe?.user?.id || 123456;
       const res = await API.get(`/rewards/history/${userId}`);
       setHistory(res.data.rewards || []);
+      setIsPremium(res.data.isPremium || false);
+      setRemainingSpins(res.data.remainingSpins || (res.data.isPremium ? 3 : 1));
+
+      if (res.data.nextSpin) {
+        const diff = new Date(res.data.nextSpin).getTime() - Date.now();
+        if (diff > 0) {
+          setTimeLeft(diff);
+          setSpinLimitReached(true);
+        }
+      }
     } catch (err) {
       console.error("Tarixni olishda xato:", err.response?.data || err.message);
     } finally {
@@ -125,6 +129,21 @@ export default function Rewards() {
     loadHistory();
   }, []);
 
+  useEffect(() => {
+    if (!spinLimitReached || timeLeft <= 0) return;
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1000) {
+          clearInterval(interval);
+          setSpinLimitReached(false);
+          return 0;
+        }
+        return prev - 1000;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [spinLimitReached, timeLeft]);
+
   const saveReward = async (prize) => {
     setSaving(true);
     try {
@@ -133,12 +152,7 @@ export default function Rewards() {
       await API.post("/rewards/save", { telegramId: userId, prize });
       await loadHistory();
     } catch (error) {
-      if (error.response?.status === 403) {
-        setSpinLimitReached(true);
-        alert(error.response.data.error);
-      } else {
-        console.error("Sovgani saqlashda xato:", error.response?.data || error.message);
-      }
+      console.error("Sovgani saqlashda xato:", error.response?.data || error.message);
     } finally {
       setSaving(false);
     }
@@ -146,6 +160,8 @@ export default function Rewards() {
 
   const spinWheel = () => {
     if (spinning || saving || spinLimitReached) return;
+    if (remainingSpins <= 0) return setSpinLimitReached(true);
+
     setSpinning(true);
     setResult("");
 
@@ -169,23 +185,25 @@ export default function Rewards() {
       else {
         setSpinning(false);
         const prize = prizes[chosenIndex].name;
+        saveReward(prize);
+        setRemainingSpins((prev) => prev - 1);
+
         if (prize !== "Omadsiz 😢") {
-          confetti({
-            particleCount: 200,
-            spread: 120,
-            origin: { y: 0.7 },
-            colors: ["#FFD700", "#FFF8DC", "#FFEC8B", "#F5DEB3"],
-          });
-          saveReward(prize);
+          confetti({ particleCount: 200, spread: 120, origin: { y: 0.7 } });
+          setResult(`🎉 Tabriklaymiz! Siz "${prize}" sovg‘asini yutdingiz!`);
+        } else {
+          setResult("😔 Bu safar omad sizdan uzoq... yana urinib ko‘ring!");
         }
-        setResult(
-          prize === "Omadsiz 😢"
-            ? "😔 Bu safar omad sizdan uzoq... yana urinib ko‘ring!"
-            : `🎉 Tabriklaymiz! Siz "${prize}" sovg‘asini yutdingiz!`
-        );
       }
     };
     requestAnimationFrame(animate);
+  };
+
+  const formatTime = (ms) => {
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    return `${h} soat ${m} daqiqa ${s} soniya`;
   };
 
   return (
@@ -207,17 +225,28 @@ export default function Rewards() {
         className={`px-12 py-3 text-lg font-semibold rounded-full border border-yellow-400/30 transition-all ${
           spinning || saving || spinLimitReached
             ? "bg-yellow-900/40 cursor-not-allowed text-yellow-300"
-            : "bg-gradient-to-r from-yellow-500 to-amber-400 hover:scale-105 hover:shadow-[0_0_30px_rgba(255,215,0,0.4)] text-black"
+            : "bg-gradient-to-r from-yellow-500 to-amber-400 hover:scale-105 text-black"
         }`}
       >
         {spinLimitReached
-          ? "🔒 Bugun limitga yetdingiz"
+          ? "🔒 Bugun aylantirish limiti tugagan"
           : spinning
           ? "Aylanmoqda..."
           : saving
           ? "Saqlanmoqda..."
           : "Ruletni aylantirish 🎯"}
       </button>
+
+      {spinLimitReached && (
+        <p className="text-yellow-400 font-medium mt-2">
+          Siz bir kunda faqat 1 marta aylantira olasiz. Premium oling va 3 ta imkoniyatga ega bo‘ling!
+          {timeLeft > 0 && (
+            <div className="flex items-center justify-center gap-2 mt-1 text-sm text-gray-300">
+              <Clock className="w-4 h-4" /> Keyingi urinishgacha: {formatTime(timeLeft)}
+            </div>
+          )}
+        </p>
+      )}
 
       {result && (
         <p
@@ -254,6 +283,10 @@ export default function Rewards() {
             ))}
           </ul>
         )}
+      </div>
+
+      <div className="mt-4 text-gray-400 text-sm">
+        Urinishlar: {remainingSpins}/{isPremium ? 3 : 1}
       </div>
     </div>
   );
