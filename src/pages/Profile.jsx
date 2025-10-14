@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
 import API from "../api/axiosInstance";
-import PremiumCard from "../components/HeroCard";
-import ReferralBox from "../components/ReferralBox";
 
 export default function Profile() {
   const [user, setUser] = useState(null);
@@ -11,21 +9,17 @@ export default function Profile() {
     const tg = window.Telegram?.WebApp;
     tg?.ready();
 
-    const initUser = async () => {
+    const startParam = tg?.initDataUnsafe?.start_param; // 🔹 referralCode shu yerda
+    const telegramUser = tg?.initDataUnsafe?.user || {
+      id: 123456,
+      username: "test_user",
+      first_name: "Test",
+      last_name: "User",
+      photo_url: "/avatar.png",
+    };
+
+    async function login() {
       try {
-        let telegramUser = tg?.initDataUnsafe?.user;
-        const startParam = tg?.initDataUnsafe?.start_param;
-
-        if (!telegramUser) {
-          telegramUser = {
-            id: 9999,
-            username: "test_user",
-            first_name: "Test",
-            last_name: "User",
-            photo_url: "/avatar-placeholder.png",
-          };
-        }
-
         const res = await API.post("/telegram/login", {
           telegramId: telegramUser.id,
           username: telegramUser.username,
@@ -34,66 +28,42 @@ export default function Profile() {
           avatar: telegramUser.photo_url,
           referralCode: startParam || null,
         });
-
         setUser(res.data.user);
       } catch (err) {
-        console.error("❌ Login xatosi:", err.response?.data || err.message);
+        console.error("Login xatosi:", err.response?.data || err.message);
       } finally {
         setLoading(false);
       }
-    };
+    }
 
-    initUser();
+    login();
   }, []);
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center h-screen text-lg text-yellow-400 animate-pulse">
-        ⏳ Yuklanmoqda...
-      </div>
-    );
+  if (loading) return <div className="text-center mt-20">⏳ Yuklanmoqda...</div>;
+  if (!user) return <div className="text-center mt-20 text-red-400">❌ Foydalanuvchi topilmadi</div>;
 
-  if (!user)
-    return (
-      <div className="flex justify-center items-center h-screen text-lg text-red-400">
-        ❌ Foydalanuvchi topilmadi
-      </div>
-    );
+  const referralLink = `https://t.me/nft_userrbot/app?startapp=${user.referralCode}`;
 
-const botUsername = "nft_userrbot"; // o'zingizning bot username
-const referralLink = `https://t.me/${botUsername}/app?startapp=${user.referralCode}`;
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#000000] text-white px-4 py-10 md:py-16">
-      <div className="max-w-2xl mx-auto space-y-8">
-       
-        {/* Foydalanuvchi ma’lumotlari */}
-        <div className="relative glassy p-5 rounded-2xl bg-white/5 backdrop-blur-md border border-yellow-400/20 shadow-[0_0_20px_rgba(255,215,0,0.15)]">
-          <div className="flex items-center gap-4">
-            <img
-              src={user.avatar || "/avatar-placeholder.png"}
-              alt="avatar"
-              className="w-16 h-16 rounded-full border border-yellow-400/30 shadow-[0_0_15px_rgba(255,215,0,0.2)]"
-            />
-            <div>
-              <div className="font-semibold text-xl text-yellow-300">{user.first_name || user.username}</div>
-              {user.username && <div className="text-xs text-gray-400">@{user.username}</div>}
-              <div className="text-xs mt-2">
-                Premium holati:{" "}
-                {user?.premium?.isActive ? (
-                  <span className="text-green-400 font-semibold">
-                    ✅ Faol — {new Date(user.premium.expiresAt).toLocaleDateString("uz-UZ")}
-                  </span>
-                ) : (
-                  <span className="text-red-400 font-semibold">❌ Faol emas</span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="p-6 text-white max-w-md mx-auto space-y-4">
+      <div className="bg-yellow-900/20 border border-yellow-400/30 p-4 rounded-2xl text-center">
+        <img
+          src={user.avatar}
+          alt="avatar"
+          className="w-20 h-20 rounded-full mx-auto border border-yellow-400 shadow"
+        />
+        <h2 className="mt-2 text-xl font-bold text-yellow-300">{user.first_name}</h2>
+        <p className="text-sm text-gray-400">@{user.username}</p>
 
-        {/* Premium va Referral bloklari */}
-        <PremiumCard />
-        <ReferralBox link={referralLink} />
+        <div className="mt-3 text-sm">
+          <b>Referral kodingiz:</b> <span className="text-yellow-400">{user.referralCode}</span>
+        </div>
+        <input
+          type="text"
+          value={referralLink}
+          readOnly
+          className="mt-2 w-full bg-yellow-800/10 border border-yellow-500/20 rounded-lg p-2 text-sm text-yellow-200"
+        />
       </div>
     </div>
   );
