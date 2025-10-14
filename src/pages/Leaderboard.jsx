@@ -43,12 +43,9 @@ export default function Leaderboard() {
 
       <div className="flex flex-col items-center gap-2">
         <Trophy className="w-10 h-10 text-yellow-400 animate-bounce" />
-        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-100 to-amber-400 drop-shadow-gold">
+        <h1 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-100 to-amber-400 drop-shadow-gold">
           Gold Yetakchilar Jadvali
         </h1>
-        <p className="text-sm text-yellow-200/70">
-          🏆 Eng faol foydalanuvchilar — mukofotlarga ega bo‘lishadi!
-        </p>
       </div>
 
       <div className="bg-black/40 backdrop-blur-xl border border-yellow-500/30 rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(255,215,0,0.2)]">
