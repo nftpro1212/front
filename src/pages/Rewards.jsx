@@ -1,12 +1,14 @@
 import React, { useRef, useState, useEffect } from "react";
 import confetti from "canvas-confetti";
 import { Sparkles } from "lucide-react";
+import API from "../api/axiosInstance"; // ✅ backendga so‘rov yuborish uchun
 
 export default function Rewards() {
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const prizes = [
     { name: "Omadsiz 😢", probability: 0.7, color: "#5C4033" },
@@ -108,6 +110,25 @@ export default function Rewards() {
     return prizes.length - 1;
   };
 
+  // ✅ Sovgani saqlash
+  const saveReward = async (prize) => {
+    setSaving(true);
+    try {
+      const tg = window.Telegram?.WebApp;
+      const userId = tg?.initDataUnsafe?.user?.id || 123456;
+
+      await API.post("/rewards/save", {
+        telegramId: userId,
+        prize,
+      });
+      console.log("Sovga saqlandi:", prize);
+    } catch (error) {
+      console.error("Sovgani saqlashda xato:", error.response?.data || error.message);
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const spinWheel = () => {
     if (spinning) return;
     setSpinning(true);
@@ -143,6 +164,9 @@ export default function Rewards() {
             origin: { y: 0.7 },
             colors: ["#FFD700", "#FFF8DC", "#FFEC8B", "#F5DEB3"],
           });
+
+          // ✅ Sovgani saqlash chaqiruvi
+          saveReward(prize);
         }
 
         setResult(
@@ -191,15 +215,19 @@ export default function Rewards() {
 
         <button
           onClick={spinWheel}
-          disabled={spinning}
+          disabled={spinning || saving}
           className={`px-12 py-3 text-lg font-semibold rounded-full shadow-lg transition-all border border-yellow-400/30
             ${
-              spinning
+              spinning || saving
                 ? "bg-yellow-900/40 cursor-not-allowed text-yellow-300"
                 : "bg-gradient-to-r from-yellow-500 to-amber-400 hover:scale-105 hover:shadow-[0_0_30px_rgba(255,215,0,0.4)] text-black"
             }`}
         >
-          {spinning ? "Aylanmoqda..." : "Ruletni aylantirish 🎯"}
+          {spinning
+            ? "Aylanmoqda..."
+            : saving
+            ? "Saqalanmoqda..."
+            : "Ruletni aylantirish 🎯"}
         </button>
 
         {result && (
