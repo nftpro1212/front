@@ -6,9 +6,14 @@ export default function Leaderboard() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    API.get("/referral/leaderboard")
-      .then((res) => setData(res.data))
-      .catch(console.error);
+    API.get("/referrals/leaderboard") // ✅ to‘g‘ri endpoint nomi
+      .then((res) => {
+        // Backenddan qaytgan format: { leaderboard: [ ... ] }
+        setData(res.data.leaderboard || []);
+      })
+      .catch((err) => {
+        console.error("Leaderboard xatosi:", err.response?.data || err.message);
+      });
   }, []);
 
   const getRankIcon = (rank) => {
@@ -52,7 +57,7 @@ export default function Leaderboard() {
                 </span>
               </div>
               <div className="text-sm font-semibold text-cyan-400">
-                {row.total}
+                {row.totalRefs}
               </div>
             </div>
           ))}
