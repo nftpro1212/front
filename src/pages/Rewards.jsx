@@ -11,6 +11,7 @@ export default function Rewards() {
   const [saving, setSaving] = useState(false);
   const [history, setHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
+  const [spinLimitReached, setSpinLimitReached] = useState(false);
 
   const prizes = [
     { name: "Omadsiz 😢", probability: 0.7, color: "#5C4033" },
@@ -29,12 +30,11 @@ export default function Rewards() {
   const SEGMENTS = prizes.length;
   const SEGMENT_DEG = 360 / SEGMENTS;
 
-  // 🎨 Ruletni chizish
+  // 🌀 Ruletni chizish
   const drawWheel = (angleOffsetRad = 0) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-
     const cssSize = 420;
     const dpr = window.devicePixelRatio || 1;
     canvas.width = cssSize * dpr;
@@ -74,13 +74,11 @@ export default function Rewards() {
       ctx.restore();
     }
 
-    // markazdagi bezak
     ctx.beginPath();
     ctx.arc(center, center, radius * 0.22, 0, Math.PI * 2);
     ctx.fillStyle = "rgba(255, 215, 0, 0.2)";
     ctx.fill();
 
-    // indikator
     ctx.save();
     ctx.translate(center, center);
     ctx.beginPath();
@@ -98,9 +96,6 @@ export default function Rewards() {
 
   useEffect(() => {
     drawWheel(0);
-    const onResize = () => drawWheel(0);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
   }, []);
 
   const getRandomPrizeIndex = () => {
@@ -113,26 +108,6 @@ export default function Rewards() {
     return prizes.length - 1;
   };
 
-  // 🎁 Sovgani saqlash
-  const saveReward = async (prize) => {
-    setSaving(true);
-    try {
-      const tg = window.Telegram?.WebApp;
-      const userId = tg?.initDataUnsafe?.user?.id || 123456;
-
-      await API.post("/rewards/save", {
-        telegramId: userId,
-        prize,
-      });
-      await loadHistory(); // ✅ saqlangandan so‘ng tarixni yangilash
-    } catch (error) {
-      console.error("Sovgani saqlashda xato:", error.response?.data || error.message);
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  // 🔄 Tarixni olish
   const loadHistory = async () => {
     try {
       const tg = window.Telegram?.WebApp;
@@ -150,9 +125,27 @@ export default function Rewards() {
     loadHistory();
   }, []);
 
-  // 🎡 Ruletni aylantirish
+  const saveReward = async (prize) => {
+    setSaving(true);
+    try {
+      const tg = window.Telegram?.WebApp;
+      const userId = tg?.initDataUnsafe?.user?.id || 123456;
+      await API.post("/rewards/save", { telegramId: userId, prize });
+      await loadHistory();
+    } catch (error) {
+      if (error.response?.status === 403) {
+        setSpinLimitReached(true);
+        alert(error.response.data.error);
+      } else {
+        console.error("Sovgani saqlashda xato:", error.response?.data || error.message);
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const spinWheel = () => {
-    if (spinning) return;
+    if (spinning || saving || spinLimitReached) return;
     setSpinning(true);
     setResult("");
 
@@ -172,12 +165,10 @@ export default function Rewards() {
       const currentRad = totalRotationRad * eased;
       drawWheel(currentRad);
 
-      if (t < 1) {
-        rafRef.current = requestAnimationFrame(animate);
-      } else {
+      if (t < 1) requestAnimationFrame(animate);
+      else {
         setSpinning(false);
         const prize = prizes[chosenIndex].name;
-
         if (prize !== "Omadsiz 😢") {
           confetti({
             particleCount: 200,
@@ -187,7 +178,6 @@ export default function Rewards() {
           });
           saveReward(prize);
         }
-
         setResult(
           prize === "Omadsiz 😢"
             ? "😔 Bu safar omad sizdan uzoq... yana urinib ko‘ring!"
@@ -195,13 +185,8 @@ export default function Rewards() {
         );
       }
     };
-
-    rafRef.current = requestAnimationFrame(animate);
+    requestAnimationFrame(animate);
   };
-
-  useEffect(() => {
-    return () => rafRef.current && cancelAnimationFrame(rafRef.current);
-  }, []);
 
   return (
     <div className="max-w-2xl mx-auto px-4 pt-12 pb-32 text-center text-white space-y-10 relative">
@@ -215,46 +200,37 @@ export default function Rewards() {
         </h1>
       </div>
 
-      <div className="flex flex-col items-center gap-6">
-        <div className="relative">
-          <canvas
-            ref={canvasRef}
-            width={420}
-            height={420}
-            className={`rounded-full shadow-[0_0_60px_rgba(255,215,0,0.3)] transition-all ${
-              spinning ? "scale-95 opacity-90" : "scale-100"
-            }`}
-          />
-          <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-yellow-500/10 to-amber-300/10 blur-2xl" />
-        </div>
+      <canvas ref={canvasRef} className="mx-auto rounded-full shadow-[0_0_60px_rgba(255,215,0,0.3)]" />
+      <button
+        onClick={spinWheel}
+        disabled={spinning || saving || spinLimitReached}
+        className={`px-12 py-3 text-lg font-semibold rounded-full border border-yellow-400/30 transition-all ${
+          spinning || saving || spinLimitReached
+            ? "bg-yellow-900/40 cursor-not-allowed text-yellow-300"
+            : "bg-gradient-to-r from-yellow-500 to-amber-400 hover:scale-105 hover:shadow-[0_0_30px_rgba(255,215,0,0.4)] text-black"
+        }`}
+      >
+        {spinLimitReached
+          ? "🔒 Bugun limitga yetdingiz"
+          : spinning
+          ? "Aylanmoqda..."
+          : saving
+          ? "Saqlanmoqda..."
+          : "Ruletni aylantirish 🎯"}
+      </button>
 
-        <button
-          onClick={spinWheel}
-          disabled={spinning || saving}
-          className={`px-12 py-3 text-lg font-semibold rounded-full shadow-lg transition-all border border-yellow-400/30
-            ${
-              spinning || saving
-                ? "bg-yellow-900/40 cursor-not-allowed text-yellow-300"
-                : "bg-gradient-to-r from-yellow-500 to-amber-400 hover:scale-105 hover:shadow-[0_0_30px_rgba(255,215,0,0.4)] text-black"
-            }`}
+      {result && (
+        <p
+          className={`text-lg font-semibold mt-4 ${
+            result.includes("yutdingiz")
+              ? "text-yellow-300 animate-pulse"
+              : "text-gray-400"
+          }`}
         >
-          {spinning ? "Aylanmoqda..." : saving ? "Saqalanmoqda..." : "Ruletni aylantirish 🎯"}
-        </button>
+          {result}
+        </p>
+      )}
 
-        {result && (
-          <div
-            className={`text-lg font-semibold mt-4 transition-all ${
-              result.includes("yutdingiz")
-                ? "text-yellow-300 animate-pulse drop-shadow-lg"
-                : "text-gray-400"
-            }`}
-          >
-            {result}
-          </div>
-        )}
-      </div>
-
-      {/* 🏆 Yutgan sovg‘alar tarixi */}
       <div className="mt-12 text-left bg-yellow-900/10 border border-yellow-500/20 rounded-2xl p-5 shadow-lg">
         <h2 className="flex items-center gap-2 text-xl font-bold text-yellow-300 mb-3">
           <Gift className="w-6 h-6 text-yellow-400" /> Yutgan sovg‘alar tarixi
@@ -272,7 +248,7 @@ export default function Rewards() {
               >
                 <span className="text-yellow-200">{h.prize}</span>
                 <span className="text-gray-400 text-xs">
-                  {new Date(h.date || h.createdAt).toLocaleString("uz-UZ")}
+                  {new Date(h.createdAt).toLocaleString("uz-UZ")}
                 </span>
               </li>
             ))}
