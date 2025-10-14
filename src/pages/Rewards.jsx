@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import confetti from "canvas-confetti";
-import { Sparkles } from "lucide-react";
-import API from "../api/axiosInstance"; // ✅ backendga so‘rov yuborish uchun
+import { Sparkles, Gift } from "lucide-react";
+import API from "../api/axiosInstance";
 
 export default function Rewards() {
   const canvasRef = useRef(null);
@@ -9,6 +9,8 @@ export default function Rewards() {
   const [spinning, setSpinning] = useState(false);
   const [result, setResult] = useState("");
   const [saving, setSaving] = useState(false);
+  const [history, setHistory] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(true);
 
   const prizes = [
     { name: "Omadsiz 😢", probability: 0.7, color: "#5C4033" },
@@ -27,6 +29,7 @@ export default function Rewards() {
   const SEGMENTS = prizes.length;
   const SEGMENT_DEG = 360 / SEGMENTS;
 
+  // 🎨 Ruletni chizish
   const drawWheel = (angleOffsetRad = 0) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -77,7 +80,7 @@ export default function Rewards() {
     ctx.fillStyle = "rgba(255, 215, 0, 0.2)";
     ctx.fill();
 
-    // indikator (oltin uch)
+    // indikator
     ctx.save();
     ctx.translate(center, center);
     ctx.beginPath();
@@ -110,7 +113,7 @@ export default function Rewards() {
     return prizes.length - 1;
   };
 
-  // ✅ Sovgani saqlash
+  // 🎁 Sovgani saqlash
   const saveReward = async (prize) => {
     setSaving(true);
     try {
@@ -121,7 +124,7 @@ export default function Rewards() {
         telegramId: userId,
         prize,
       });
-      console.log("Sovga saqlandi:", prize);
+      await loadHistory(); // ✅ saqlangandan so‘ng tarixni yangilash
     } catch (error) {
       console.error("Sovgani saqlashda xato:", error.response?.data || error.message);
     } finally {
@@ -129,6 +132,25 @@ export default function Rewards() {
     }
   };
 
+  // 🔄 Tarixni olish
+  const loadHistory = async () => {
+    try {
+      const tg = window.Telegram?.WebApp;
+      const userId = tg?.initDataUnsafe?.user?.id || 123456;
+      const res = await API.get(`/rewards/history/${userId}`);
+      setHistory(res.data.rewards || []);
+    } catch (err) {
+      console.error("Tarixni olishda xato:", err.response?.data || err.message);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  useEffect(() => {
+    loadHistory();
+  }, []);
+
+  // 🎡 Ruletni aylantirish
   const spinWheel = () => {
     if (spinning) return;
     setSpinning(true);
@@ -140,7 +162,6 @@ export default function Rewards() {
     const alignDeg = ((targetDeg - (chosenIndex + 0.5) * SEGMENT_DEG) % 360 + 360) % 360;
     const totalRotationDeg = spins * 360 + alignDeg;
     const totalRotationRad = (totalRotationDeg * Math.PI) / 180;
-
     const duration = 6000;
     const start = performance.now();
 
@@ -164,8 +185,6 @@ export default function Rewards() {
             origin: { y: 0.7 },
             colors: ["#FFD700", "#FFF8DC", "#FFEC8B", "#F5DEB3"],
           });
-
-          // ✅ Sovgani saqlash chaqiruvi
           saveReward(prize);
         }
 
@@ -185,7 +204,7 @@ export default function Rewards() {
   }, []);
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pt-12 pb-24 text-center text-white space-y-10 relative">
+    <div className="max-w-2xl mx-auto px-4 pt-12 pb-32 text-center text-white space-y-10 relative">
       <div className="absolute inset-0 bg-gradient-to-b from-yellow-900/10 via-black/50 to-black/90 -z-10 blur-2xl" />
       <div className="absolute inset-0 bg-[url('/gold-texture.jpg')] opacity-5 -z-10" />
 
@@ -223,11 +242,7 @@ export default function Rewards() {
                 : "bg-gradient-to-r from-yellow-500 to-amber-400 hover:scale-105 hover:shadow-[0_0_30px_rgba(255,215,0,0.4)] text-black"
             }`}
         >
-          {spinning
-            ? "Aylanmoqda..."
-            : saving
-            ? "Saqalanmoqda..."
-            : "Ruletni aylantirish 🎯"}
+          {spinning ? "Aylanmoqda..." : saving ? "Saqalanmoqda..." : "Ruletni aylantirish 🎯"}
         </button>
 
         {result && (
@@ -240,6 +255,32 @@ export default function Rewards() {
           >
             {result}
           </div>
+        )}
+      </div>
+
+      {/* 🏆 Yutgan sovg‘alar tarixi */}
+      <div className="mt-12 text-left bg-yellow-900/10 border border-yellow-500/20 rounded-2xl p-5 shadow-lg">
+        <h2 className="flex items-center gap-2 text-xl font-bold text-yellow-300 mb-3">
+          <Gift className="w-6 h-6 text-yellow-400" /> Yutgan sovg‘alar tarixi
+        </h2>
+        {loadingHistory ? (
+          <p className="text-gray-400 text-sm">⏳ Yuklanmoqda...</p>
+        ) : history.length === 0 ? (
+          <p className="text-gray-500 text-sm">Hozircha yutuqlar yo‘q 😅</p>
+        ) : (
+          <ul className="space-y-2 max-h-60 overflow-y-auto pr-1">
+            {history.map((h, i) => (
+              <li
+                key={i}
+                className="flex justify-between items-center bg-yellow-800/10 border border-yellow-500/10 rounded-lg px-3 py-2 text-sm"
+              >
+                <span className="text-yellow-200">{h.prize}</span>
+                <span className="text-gray-400 text-xs">
+                  {new Date(h.date || h.createdAt).toLocaleString("uz-UZ")}
+                </span>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
     </div>
