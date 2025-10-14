@@ -211,13 +211,9 @@ export default function Rewards() {
       <div className="flex justify-center items-center gap-2">
         <Sparkles className="w-7 h-7 text-yellow-400" />
         <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 drop-shadow-lg">
-          Gold Rulet
+          Omad G'ildiragi
         </h1>
       </div>
-
-      <p className="text-sm text-yellow-200/80 max-w-md mx-auto">
-        💫 Ruletni aylantiring — sizda 0.2% ehtimol bilan <b>iPhone 17 Pro Max</b> yutib olish imkoniyati bor!
-      </p>
 
       <div className="flex flex-col items-center gap-6">
         <div className="relative">
