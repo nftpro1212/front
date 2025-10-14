@@ -60,8 +60,8 @@ export default function Profile() {
       </div>
     );
 
-  const referralLink = `https://t.me/nft_userrbot?start=${user.referralCode}`;
-
+const botUsername = "nft_userrbot"; // o'zingizning bot username
+const referralLink = `https://t.me/${botUsername}?startapp=${user.referralCode}`;
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#000000] text-white px-4 py-10 md:py-16">
       <div className="max-w-2xl mx-auto space-y-8">
