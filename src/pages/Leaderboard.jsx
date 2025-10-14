@@ -1,73 +1,106 @@
 import React, { useEffect, useState } from "react";
 import API from "../api/axiosInstance";
-import { Trophy, Medal, Crown } from "lucide-react";
+import { Trophy, Crown, Gift, Medal } from "lucide-react";
 
 export default function Leaderboard() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    API.get("/referrals/leaderboard") // ✅ to‘g‘ri endpoint nomi
-      .then((res) => {
-        // Backenddan qaytgan format: { leaderboard: [ ... ] }
-        setData(res.data.leaderboard || []);
-      })
-      .catch((err) => {
-        console.error("Leaderboard xatosi:", err.response?.data || err.message);
-      });
+    API.get("/referrals/leaderboard")
+      .then((res) => setData(res.data.leaderboard || []))
+      .catch((err) =>
+        console.error("Leaderboard xatosi:", err.response?.data || err.message)
+      );
   }, []);
+
+  // 🎁 Sovg‘alar va mukofotlar
+  const getPrize = (rank) => {
+    const cashPrizes = [300000, 200000, 150000, 120000, 90000, 70000, 50000];
+    if (rank === 1) return "🎉 iPhone 17 Pro Max";
+    if (rank === 2) return "🎁 iPad Air (2025)";
+    if (rank === 3) return "🎧 AirPods Max";
+    if (rank >= 4 && rank <= 10) return `${cashPrizes[rank - 4].toLocaleString()} so‘m`;
+    return null;
+  };
 
   const getRankIcon = (rank) => {
     if (rank === 1)
-      return <Crown className="w-5 h-5 text-yellow-400 inline-block mr-1" />;
+      return <Crown className="w-6 h-6 text-yellow-400 drop-shadow-gold" />;
     if (rank === 2)
-      return <Medal className="w-5 h-5 text-gray-300 inline-block mr-1" />;
+      return <Medal className="w-6 h-6 text-gray-300 drop-shadow-silver" />;
     if (rank === 3)
-      return <Medal className="w-5 h-5 text-amber-600 inline-block mr-1" />;
-    return <span className="font-bold text-cyan-400 mr-1">#{rank}</span>;
+      return <Medal className="w-6 h-6 text-amber-600 drop-shadow-bronze" />;
+    return (
+      <span className="font-bold text-yellow-300 drop-shadow-gold">#{rank}</span>
+    );
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pt-8 pb-24 space-y-6">
-      <div className="flex items-center justify-center gap-2">
-        <Trophy className="w-6 h-6 text-yellow-400" />
-        <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
-          Yetakchilar Jadvali
+    <div className="max-w-3xl mx-auto px-4 pt-12 pb-24 space-y-8 text-white relative">
+      {/* ✨ Gold background effects */}
+      <div className="absolute inset-0 bg-gradient-to-b from-yellow-900/10 via-black/60 to-black/95 blur-2xl -z-10" />
+      <div className="absolute inset-0 bg-[url('/gold-texture.jpg')] opacity-10 -z-10" />
+
+      <div className="flex flex-col items-center gap-2">
+        <Trophy className="w-10 h-10 text-yellow-400 animate-bounce" />
+        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-100 to-amber-400 drop-shadow-gold">
+          Gold Yetakchilar Jadvali
         </h1>
+        <p className="text-sm text-yellow-200/70">
+          🏆 Eng faol foydalanuvchilar — mukofotlarga ega bo‘lishadi!
+        </p>
       </div>
 
-      <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl overflow-hidden shadow-xl">
-        <div className="hidden sm:grid grid-cols-3 bg-white/10 text-xs sm:text-sm uppercase tracking-wider font-semibold text-gray-300">
+      <div className="bg-black/40 backdrop-blur-xl border border-yellow-500/30 rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(255,215,0,0.2)]">
+        <div className="hidden sm:grid grid-cols-4 bg-yellow-500/10 text-xs sm:text-sm uppercase tracking-wider font-semibold text-yellow-300 border-b border-yellow-600/20">
           <div className="py-3 px-4">O‘rin</div>
           <div className="py-3 px-4">Foydalanuvchi</div>
-          <div className="py-3 px-4 text-right">Takliflar soni</div>
+          <div className="py-3 px-4 text-center">Takliflar</div>
+          <div className="py-3 px-4 text-right">Mukofot</div>
         </div>
 
-        <div className="divide-y divide-white/5">
-          {data.map((row, i) => (
-            <div
-              key={i}
-              className={`flex justify-between items-center py-3 px-4 transition-all duration-200 hover:bg-white/5 ${
-                i < 3 ? "bg-gradient-to-r from-gray-900/80 to-gray-800/80" : ""
-              }`}
-            >
-              <div className="flex items-center gap-2 text-sm font-medium">
-                {getRankIcon(i + 1)}
-                <span className="truncate max-w-[140px] sm:max-w-[200px]">
+        <div className="divide-y divide-yellow-600/10">
+          {data.slice(0, 10).map((row, i) => {
+            const rank = i + 1;
+            const prize = getPrize(rank);
+            const glow =
+              rank === 1
+                ? "from-yellow-500/20 to-yellow-300/10"
+                : rank === 2
+                ? "from-gray-400/20 to-gray-200/10"
+                : rank === 3
+                ? "from-amber-500/10 to-amber-200/5"
+                : "from-yellow-900/10 to-black/5";
+
+            return (
+              <div
+                key={i}
+                className={`grid grid-cols-4 items-center py-4 px-4 text-sm sm:text-base transition-all hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(255,215,0,0.3)] bg-gradient-to-r ${glow}`}
+              >
+                <div className="flex items-center gap-2">{getRankIcon(rank)}</div>
+                <div className="truncate font-medium">
                   {row.username || row.first_name || "Foydalanuvchi"}
-                </span>
+                </div>
+                <div className="text-center font-semibold text-yellow-300">
+                  {row.totalRefs}
+                </div>
+                <div className="text-right font-semibold text-yellow-200">
+                  {prize ? prize : "-"}
+                </div>
               </div>
-              <div className="text-sm font-semibold text-cyan-400">
-                {row.totalRefs}
-              </div>
-            </div>
-          ))}
+            );
+          })}
 
           {data.length === 0 && (
-            <div className="text-center py-6 text-gray-400">
-              💤 Hozircha hech kim mavjud emas
+            <div className="text-center py-8 text-yellow-300/60">
+              😴 Hozircha hech kim mavjud emas...
             </div>
           )}
         </div>
+      </div>
+
+      <div className="text-center text-sm text-yellow-200/60 mt-8">
+        💰 Umumiy mukofot jamg‘armasi: <b>1 000 000 so‘m + Premium sovg‘alar</b>
       </div>
     </div>
   );
