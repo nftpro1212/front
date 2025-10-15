@@ -70,13 +70,11 @@ export default function Rewards() {
       ctx.restore();
     }
 
-    // Markaziy dekorativ halqa
     ctx.beginPath();
     ctx.arc(center, center, radius * 0.22, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(255, 215, 0, 0.25)";
+    ctx.fillStyle = "rgba(255, 215, 0, 0.2)";
     ctx.fill();
 
-    // Yuqoridagi o‘qcha
     ctx.save();
     ctx.translate(center, center);
     ctx.beginPath();
@@ -90,7 +88,9 @@ export default function Rewards() {
     ctx.restore();
   };
 
-  useEffect(() => drawWheel(0), []);
+  useEffect(() => {
+    drawWheel(0);
+  }, []);
 
   const getRandomPrizeIndex = () => {
     const random = Math.random();
@@ -110,6 +110,14 @@ export default function Rewards() {
       setHistory(res.data.rewards || []);
       setIsPremium(res.data.isPremium || false);
       setRemainingSpins(res.data.remainingSpins);
+
+      if (res.data.nextSpin) {
+        const diff = new Date(res.data.nextSpin).getTime() - Date.now();
+        if (diff > 0) {
+          setTimeLeft(diff);
+          setSpinLimitReached(true);
+        }
+      }
     } catch (err) {
       console.error("Tarixni olishda xato:", err.response?.data || err.message);
     } finally {
@@ -117,7 +125,25 @@ export default function Rewards() {
     }
   };
 
-  useEffect(() => loadHistory(), []);
+  useEffect(() => {
+    loadHistory();
+  }, []);
+
+  useEffect(() => {
+    if (!spinLimitReached || timeLeft <= 0) return;
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1000) {
+          clearInterval(interval);
+          setSpinLimitReached(false);
+          loadHistory();
+          return 0;
+        }
+        return prev - 1000;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [spinLimitReached, timeLeft]);
 
   const saveReward = async (prize) => {
     setSaving(true);
@@ -174,6 +200,13 @@ export default function Rewards() {
     requestAnimationFrame(animate);
   };
 
+  const formatTime = (ms) => {
+    const h = Math.floor(ms / 3600000);
+    const m = Math.floor((ms % 3600000) / 60000);
+    const s = Math.floor((ms % 60000) / 1000);
+    return `${h} soat ${m} daqiqa ${s} soniya`;
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-start bg-gradient-to-b from-black via-zinc-900 to-black text-white py-10 px-4">
       <div className="w-full max-w-xl flex flex-col items-center space-y-8 text-center">
@@ -184,26 +217,15 @@ export default function Rewards() {
           </h1>
         </div>
 
-        {/* 🔸 Urinishlar soni yuqorida */}
-        <div className="text-sm text-gray-400 bg-yellow-900/20 border border-yellow-600/20 px-4 py-2 rounded-full">
-          Qolgan urinishlar:{" "}
-          <span className="text-yellow-300 font-semibold">
-            {remainingSpins}/{isPremium ? 3 : 1}
-          </span>
-        </div>
-
-        {/* 🔹 G‘ildirak */}
-        <div className="relative flex items-center justify-center">
+        <div className="relative">
           <canvas
             ref={canvasRef}
             className="rounded-full shadow-[0_0_60px_rgba(255,215,0,0.3)]"
           />
-
-          {/* 🔘 Markazdagi aylantirish tugmasi */}
           <button
             onClick={spinWheel}
             disabled={spinning || saving || spinLimitReached}
-            className={`absolute px-8 py-3 text-lg font-bold rounded-full transition-all ${
+            className={`absolute inset-x-0 bottom-[-70px] mx-auto px-10 py-3 text-lg font-semibold rounded-full transition-all ${
               spinning || saving || spinLimitReached
                 ? "bg-yellow-900/40 cursor-not-allowed text-yellow-300 border border-yellow-400/30"
                 : "bg-gradient-to-r from-yellow-400 to-amber-300 text-black hover:scale-105 shadow-lg"
@@ -215,9 +237,20 @@ export default function Rewards() {
               ? "Aylanmoqda..."
               : saving
               ? "Saqlanmoqda..."
-              : "🎯 Aylantir"}
+              : "🎯 Aylantirish"}
           </button>
         </div>
+
+        {spinLimitReached && (
+          <div className="text-yellow-400 font-medium mt-10">
+            Siz 24 soat ichida faqat {isPremium ? "3" : "1"} marta aylantira olasiz.
+            {timeLeft > 0 && (
+              <div className="flex items-center justify-center gap-2 text-sm text-gray-300 mt-1">
+                <Clock className="w-4 h-4" /> Qolgan vaqt: {formatTime(timeLeft)}
+              </div>
+            )}
+          </div>
+        )}
 
         {result && (
           <p
@@ -231,8 +264,7 @@ export default function Rewards() {
           </p>
         )}
 
-        {/* 📜 Tarix */}
-        <div className="w-full bg-yellow-900/10 border border-yellow-600/20 rounded-2xl p-5 shadow-md mt-6 text-left">
+        <div className="w-full bg-yellow-900/10 border border-yellow-600/20 rounded-2xl p-5 shadow-md mt-12 text-left">
           <h2 className="flex items-center gap-2 text-xl font-bold text-yellow-300 mb-3">
             <Gift className="w-6 h-6 text-yellow-400" /> Yutuqlar tarixi
           </h2>
@@ -255,6 +287,10 @@ export default function Rewards() {
               ))}
             </ul>
           )}
+        </div>
+
+        <div className="text-gray-400 text-sm mt-4">
+          Urinishlar: {remainingSpins}/{isPremium ? 3 : 1}
         </div>
       </div>
     </div>
