@@ -1,40 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { Crown, ShieldCheck } from "lucide-react";
-import API from "../api/axiosInstance";
 
-export default function HeroCard() {
-  const [isPremium, setIsPremium] = useState(false);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 123456;
-        const res = await API.get(`/user/${tgId}`); // foydalanuvchi ma’lumotini olish
-        setIsPremium(res.data.user?.premium?.isActive || false);
-      } catch (err) {
-        console.error("Foydalanuvchi ma'lumotini olishda xato:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUser();
-  }, []);
-
-  const handleSubscribe = async () => {
-    try {
-      const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 123456;
-      const res = await API.post("/subscribe", { tgId });
-      if (res.data.paymentUrl) {
-        // foydalanuvchini adminga yo‘naltirish
-        window.open(res.data.paymentUrl, "_blank");
-      }
-    } catch (err) {
-      console.error("Obuna bo‘lishda xato:", err);
-    }
-  };
-
+export default function PremiumCard({ isPremium, onSubscribe, loading }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -66,7 +34,7 @@ export default function HeroCard() {
           <motion.button
             whileHover={{ scale: 1.08, boxShadow: "0 0 25px rgba(255,215,0,0.7)" }}
             whileTap={{ scale: 0.95 }}
-            onClick={handleSubscribe}
+            onClick={onSubscribe}
             disabled={loading || isPremium}
             className={`px-6 py-3 rounded-full font-bold text-black shadow-[0_0_20px_rgba(255,215,0,0.4)] transition-all ${
               isPremium || loading
@@ -74,7 +42,11 @@ export default function HeroCard() {
                 : "bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 hover:from-yellow-400 hover:to-yellow-600"
             }`}
           >
-            {isPremium ? "Siz allaqachon premium" : "Obuna bo‘lish 100.000 so'm"}
+            {loading
+              ? "Yuklanmoqda..."
+              : isPremium
+              ? "Siz allaqachon premium"
+              : "Obuna bo‘lish 100.000 so'm"}
           </motion.button>
         </div>
 
