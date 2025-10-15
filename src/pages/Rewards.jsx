@@ -70,13 +70,13 @@ export default function Rewards() {
       ctx.restore();
     }
 
-    // Markaziy dekorativ doira
+    // Markaziy dekorativ halqa
     ctx.beginPath();
-    ctx.arc(center, center, radius * 0.25, 0, Math.PI * 2);
-    ctx.fillStyle = "rgba(255, 215, 0, 0.15)";
+    ctx.arc(center, center, radius * 0.22, 0, Math.PI * 2);
+    ctx.fillStyle = "rgba(255, 215, 0, 0.25)";
     ctx.fill();
 
-    // Yuqoridagi o‘q
+    // Yuqoridagi o‘qcha
     ctx.save();
     ctx.translate(center, center);
     ctx.beginPath();
@@ -109,9 +109,9 @@ export default function Rewards() {
       const res = await API.get(`/rewards/history/${userId}`);
       setHistory(res.data.rewards || []);
       setIsPremium(res.data.isPremium || false);
-      setRemainingSpins(res.data.remainingSpins || (res.data.isPremium ? 3 : 1));
+      setRemainingSpins(res.data.remainingSpins);
     } catch (err) {
-      console.error("Tarix xatosi:", err.response?.data || err.message);
+      console.error("Tarixni olishda xato:", err.response?.data || err.message);
     } finally {
       setLoadingHistory(false);
     }
@@ -127,7 +127,7 @@ export default function Rewards() {
       await API.post("/rewards/save", { telegramId: userId, prize });
       await loadHistory();
     } catch (error) {
-      console.error("Saqlash xatosi:", error);
+      console.error("Sovgani saqlashda xato:", error.response?.data || error.message);
     } finally {
       setSaving(false);
     }
@@ -139,6 +139,7 @@ export default function Rewards() {
 
     setSpinning(true);
     setResult("");
+
     const chosenIndex = getRandomPrizeIndex();
     const spins = 6 + Math.floor(Math.random() * 2);
     const targetDeg = 270;
@@ -160,7 +161,7 @@ export default function Rewards() {
         setSpinning(false);
         const prize = prizes[chosenIndex].name;
         saveReward(prize);
-        setRemainingSpins((prev) => prev - 1);
+        setRemainingSpins((prev) => Math.max(prev - 1, 0));
 
         if (prize !== "Omadsiz 😢") {
           confetti({ particleCount: 200, spread: 120, origin: { y: 0.7 } });
@@ -174,90 +175,87 @@ export default function Rewards() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 pt-12 pb-32 text-center text-white space-y-10 relative">
-      {/* Orqa fon */}
-      <div className="absolute inset-0 bg-gradient-to-b from-yellow-900/10 via-black/60 to-black/90 -z-10 blur-2xl" />
-      <div className="absolute inset-0 bg-[url('/gold-texture.jpg')] opacity-5 -z-10" />
+    <div className="min-h-screen flex flex-col items-center justify-start bg-gradient-to-b from-black via-zinc-900 to-black text-white py-10 px-4">
+      <div className="w-full max-w-xl flex flex-col items-center space-y-8 text-center">
+        <div className="flex items-center gap-2">
+          <Sparkles className="w-7 h-7 text-yellow-400" />
+          <h1 className="text-4xl font-extrabold bg-gradient-to-r from-yellow-300 to-yellow-500 bg-clip-text text-transparent">
+            Omad G‘ildiragi
+          </h1>
+        </div>
 
-      {/* Sarlavha */}
-      <div className="flex justify-center items-center gap-2">
-        <Sparkles className="w-7 h-7 text-yellow-400" />
-        <h1 className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-yellow-200 to-yellow-500 drop-shadow-lg">
-          Omad G‘ildiragi
-        </h1>
-      </div>
+        {/* 🔸 Urinishlar soni yuqorida */}
+        <div className="text-sm text-gray-400 bg-yellow-900/20 border border-yellow-600/20 px-4 py-2 rounded-full">
+          Qolgan urinishlar:{" "}
+          <span className="text-yellow-300 font-semibold">
+            {remainingSpins}/{isPremium ? 3 : 1}
+          </span>
+        </div>
 
-      {/* G‘ildirak konteyneri */}
-      <div className="relative flex justify-center items-center">
-        <canvas
-          ref={canvasRef}
-          className="rounded-full shadow-[0_0_60px_rgba(255,215,0,0.3)]"
-        />
-        {/* 🟡 Tugma g‘ildirak markazida */}
-        <button
-          onClick={spinWheel}
-          disabled={spinning || saving || spinLimitReached}
-          className={`absolute px-8 py-3 text-lg font-bold rounded-full border border-yellow-400/30 shadow-lg backdrop-blur-sm transition-all ${
-            spinning || saving || spinLimitReached
-              ? "bg-yellow-900/50 text-yellow-300 cursor-not-allowed"
-              : "bg-gradient-to-r from-yellow-400 to-amber-300 text-black hover:scale-110"
-          }`}
-          style={{
-            boxShadow:
-              "0 0 20px rgba(255,215,0,0.4), inset 0 0 10px rgba(255,255,255,0.3)",
-          }}
-        >
-          {spinning
-            ? "Aylanmoqda..."
-            : saving
-            ? "Saqlanmoqda..."
-            : spinLimitReached
-            ? "🔒 Limit tugagan"
-            : "🎯 Aylantirish"}
-        </button>
-      </div>
+        {/* 🔹 G‘ildirak */}
+        <div className="relative flex items-center justify-center">
+          <canvas
+            ref={canvasRef}
+            className="rounded-full shadow-[0_0_60px_rgba(255,215,0,0.3)]"
+          />
 
-      {/* Natija */}
-      {result && (
-        <p
-          className={`text-lg font-semibold mt-4 ${
-            result.includes("yutdingiz")
-              ? "text-yellow-300 animate-pulse"
-              : "text-gray-400"
-          }`}
-        >
-          {result}
-        </p>
-      )}
+          {/* 🔘 Markazdagi aylantirish tugmasi */}
+          <button
+            onClick={spinWheel}
+            disabled={spinning || saving || spinLimitReached}
+            className={`absolute px-8 py-3 text-lg font-bold rounded-full transition-all ${
+              spinning || saving || spinLimitReached
+                ? "bg-yellow-900/40 cursor-not-allowed text-yellow-300 border border-yellow-400/30"
+                : "bg-gradient-to-r from-yellow-400 to-amber-300 text-black hover:scale-105 shadow-lg"
+            }`}
+          >
+            {spinLimitReached
+              ? "🔒 Limit tugagan"
+              : spinning
+              ? "Aylanmoqda..."
+              : saving
+              ? "Saqlanmoqda..."
+              : "🎯 Aylantir"}
+          </button>
+        </div>
 
-      {/* Tarix */}
-      <div className="mt-12 text-left bg-yellow-900/10 border border-yellow-500/20 rounded-2xl p-5 shadow-lg">
-        <h2 className="flex items-center gap-2 text-xl font-bold text-yellow-300 mb-3">
-          <Gift className="w-6 h-6 text-yellow-400" /> Yutgan sovg‘alar tarixi
-        </h2>
-        {loadingHistory ? (
-          <p className="text-gray-400 text-sm">⏳ Yuklanmoqda...</p>
-        ) : history.length === 0 ? (
-          <p className="text-gray-500 text-sm">Hozircha yutuqlar yo‘q 😅</p>
-        ) : (
-          <ul className="space-y-2 max-h-60 overflow-y-auto pr-1">
-            {history.map((h, i) => (
-              <li
-                key={i}
-                className="flex justify-between items-center bg-yellow-800/10 border border-yellow-500/10 rounded-lg px-3 py-2 text-sm"
-              >
-                <span className="text-yellow-200">{h.prize}</span>
-                <span className="text-gray-400 text-xs">
-                  {new Date(h.createdAt).toLocaleString("uz-UZ")}
-                </span>
-              </li>
-            ))}
-          </ul>
+        {result && (
+          <p
+            className={`text-lg font-semibold mt-6 ${
+              result.includes("yutdingiz")
+                ? "text-yellow-300 animate-pulse"
+                : "text-gray-400"
+            }`}
+          >
+            {result}
+          </p>
         )}
-      </div>
 
-      <div className="mt-4 text-gray-400 text-sm">
-        Urinishlar: {remainingSpins}/{isPremium ? 3 : 1}
+        {/* 📜 Tarix */}
+        <div className="w-full bg-yellow-900/10 border border-yellow-600/20 rounded-2xl p-5 shadow-md mt-6 text-left">
+          <h2 className="flex items-center gap-2 text-xl font-bold text-yellow-300 mb-3">
+            <Gift className="w-6 h-6 text-yellow-400" /> Yutuqlar tarixi
+          </h2>
+          {loadingHistory ? (
+            <p className="text-gray-400 text-sm">⏳ Yuklanmoqda...</p>
+          ) : history.length === 0 ? (
+            <p className="text-gray-500 text-sm">Hozircha yutuqlar yo‘q 😅</p>
+          ) : (
+            <ul className="space-y-2 max-h-60 overflow-y-auto">
+              {history.map((h, i) => (
+                <li
+                  key={i}
+                  className="flex justify-between items-center bg-yellow-800/10 border border-yellow-500/10 rounded-lg px-3 py-2 text-sm"
+                >
+                  <span className="text-yellow-200">{h.prize}</span>
+                  <span className="text-gray-400 text-xs">
+                    {new Date(h.createdAt).toLocaleString("uz-UZ")}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </div>
     </div>
   );
