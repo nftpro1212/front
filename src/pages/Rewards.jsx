@@ -217,29 +217,29 @@ export default function Rewards() {
           </h1>
         </div>
 
-        <div className="relative">
-          <canvas
-            ref={canvasRef}
-            className="rounded-full shadow-[0_0_60px_rgba(255,215,0,0.3)]"
-          />
-          <button
-            onClick={spinWheel}
-            disabled={spinning || saving || spinLimitReached}
-            className={`absolute inset-x-0 bottom-[-70px] mx-auto px-10 py-3 text-lg font-semibold rounded-full transition-all ${
-              spinning || saving || spinLimitReached
-                ? "bg-yellow-900/40 cursor-not-allowed text-yellow-300 border border-yellow-400/30"
-                : "bg-gradient-to-r from-yellow-400 to-amber-300 text-black hover:scale-105 shadow-lg"
-            }`}
-          >
-            {spinLimitReached
-              ? "🔒 Limit tugagan"
-              : spinning
-              ? "Aylanmoqda..."
-              : saving
-              ? "Saqlanmoqda..."
-              : "🎯 Aylantirish"}
-          </button>
-        </div>
+       <div className="relative flex flex-col items-center">
+  <canvas
+    ref={canvasRef}
+    className="rounded-full shadow-[0_0_60px_rgba(255,215,0,0.3)]"
+  />
+  <button
+    onClick={spinWheel}
+    disabled={spinning || saving || spinLimitReached}
+    className={`mt-6 px-10 py-3 text-lg font-semibold rounded-full transition-all ${
+      spinning || saving || spinLimitReached
+        ? "bg-yellow-900/40 cursor-not-allowed text-yellow-300 border border-yellow-400/30"
+        : "bg-gradient-to-r from-yellow-400 to-amber-300 text-black hover:scale-105 shadow-lg"
+    }`}
+  >
+    {spinLimitReached
+      ? "🔒 Limit tugagan"
+      : spinning
+      ? "Aylanmoqda..."
+      : saving
+      ? "Saqlanmoqda..."
+      : "🎯 Aylantirish"}
+  </button>
+</div>
 
         {spinLimitReached && (
           <div className="text-yellow-400 font-medium mt-10">
