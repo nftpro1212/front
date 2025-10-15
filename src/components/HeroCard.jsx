@@ -1,8 +1,40 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Crown, Info, ShieldCheck } from "lucide-react";
+import { Crown, ShieldCheck } from "lucide-react";
+import API from "../api/axiosInstance";
 
-export default function HeroCard({ onSubscribe }) {
+export default function HeroCard() {
+  const [isPremium, setIsPremium] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 123456;
+        const res = await API.get(`/user/${tgId}`); // foydalanuvchi ma’lumotini olish
+        setIsPremium(res.data.user?.premium?.isActive || false);
+      } catch (err) {
+        console.error("Foydalanuvchi ma'lumotini olishda xato:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUser();
+  }, []);
+
+  const handleSubscribe = async () => {
+    try {
+      const tgId = window.Telegram?.WebApp?.initDataUnsafe?.user?.id || 123456;
+      const res = await API.post("/subscribe", { tgId });
+      if (res.data.paymentUrl) {
+        // foydalanuvchini adminga yo‘naltirish
+        window.open(res.data.paymentUrl, "_blank");
+      }
+    } catch (err) {
+      console.error("Obuna bo‘lishda xato:", err);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
@@ -20,34 +52,35 @@ export default function HeroCard({ onSubscribe }) {
             <Crown size={24} />
           </div>
           <div>
-            <div className="text-sm text-yellow-300/80 font-medium tracking-wide">
-             
-            </div>
             <div className="text-lg font-semibold text-yellow-200">
               Har oy avtomobil va iPhone 17 yutib olish imkoniyati
             </div>
           </div>
         </div>
-<h1 className="mt-5 text-xl md:text-2xl font-extrabold leading-snug bg-gradient-to-r from-yellow-300 via-yellow-300 to-yellow-200 bg-clip-text text-transparent">
-  🚘 Premium sotib oling va oylik avtomobil va iPhone 17 va boshqa sovg'alar o'yinida qatnashing
-</h1>
 
-       
+        <h1 className="mt-5 text-xl md:text-2xl font-extrabold leading-snug bg-gradient-to-r from-yellow-300 via-yellow-300 to-yellow-200 bg-clip-text text-transparent">
+          🚘 Premium sotib oling va oylik avtomobil va iPhone 17 va boshqa sovg'alar o'yinida qatnashing
+        </h1>
 
         <div className="mt-6 flex flex-wrap gap-3">
           <motion.button
             whileHover={{ scale: 1.08, boxShadow: "0 0 25px rgba(255,215,0,0.7)" }}
             whileTap={{ scale: 0.95 }}
-            onClick={onSubscribe}
-            className="px-6 py-3 rounded-full font-bold text-black bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 shadow-[0_0_20px_rgba(255,215,0,0.4)] hover:from-yellow-400 hover:to-yellow-600 transition-all"
+            onClick={handleSubscribe}
+            disabled={loading || isPremium}
+            className={`px-6 py-3 rounded-full font-bold text-black shadow-[0_0_20px_rgba(255,215,0,0.4)] transition-all ${
+              isPremium || loading
+                ? "bg-yellow-900/40 cursor-not-allowed text-yellow-300"
+                : "bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-500 hover:from-yellow-400 hover:to-yellow-600"
+            }`}
           >
-            Obuna bo‘lish 100.000 so'm
+            {isPremium ? "Siz allaqachon premium" : "Obuna bo‘lish 100.000 so'm"}
           </motion.button>
         </div>
 
         <div className="mt-5 flex items-center gap-2 text-xs text-yellow-200/80">
           <ShieldCheck size={14} className="text-yellow-400" />
-       
+          Premium oylik to‘lov asosida ishlaydi va oy oxirigacha amal qiladi.
         </div>
       </div>
 
