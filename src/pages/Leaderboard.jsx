@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import API from "../api/axiosInstance";
-import { Trophy, Crown, Medal } from "lucide-react";
+import { Trophy, Crown, Medal, X } from "lucide-react";
 
 export default function Leaderboard() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [referrals, setReferrals] = useState([]);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     API.get("/referrals/leaderboard")
@@ -15,7 +18,6 @@ export default function Leaderboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  // 🎁 Mukofotlar ro‘yxati
   const getPrize = (rank) => {
     const cashPrizes = [300000, 200000, 150000, 120000, 90000, 70000, 50000];
     switch (rank) {
@@ -41,21 +43,28 @@ export default function Leaderboard() {
       case 3:
         return <Medal className="w-6 h-6 text-amber-600 drop-shadow-bronze" />;
       default:
-        return (
-          <span className="font-bold text-yellow-300 drop-shadow-gold">
-            #{rank}
-          </span>
-        );
+        return <span className="font-bold text-yellow-300">#{rank}</span>;
+    }
+  };
+
+  // 🔹 Yetakchini bosganda uning referallarini olish
+  const handleShowReferrals = async (telegramId, username) => {
+    try {
+      setSelectedUser(username);
+      setModalOpen(true);
+      setReferrals([]);
+      const res = await API.get(`/referrals/history/${telegramId}`);
+      setReferrals(res.data.list || []);
+    } catch (err) {
+      console.error("Referral tarix xatosi:", err);
     }
   };
 
   return (
     <div className="max-w-3xl mx-auto px-4 pt-12 pb-24 space-y-8 text-white relative">
-      {/* ✨ Background effect */}
       <div className="absolute inset-0 bg-gradient-to-b from-yellow-900/10 via-black/60 to-black/95 blur-2xl -z-10" />
       <div className="absolute inset-0 bg-[url('/gold-texture.jpg')] opacity-10 -z-10" />
 
-      {/* 🏆 Header */}
       <div className="flex flex-col items-center gap-2">
         <Trophy className="w-10 h-10 text-yellow-400 animate-bounce" />
         <h1 className="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-100 to-amber-400 drop-shadow-gold">
@@ -65,38 +74,18 @@ export default function Leaderboard() {
 
       {/* 📋 Jadval */}
       <div className="bg-black/40 backdrop-blur-xl border border-yellow-500/30 rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(255,215,0,0.2)]">
-        <div className="hidden sm:grid grid-cols-4 bg-yellow-500/10 text-xs sm:text-sm uppercase tracking-wider font-semibold text-yellow-300 border-b border-yellow-600/20">
-          <div className="py-3 px-4">O‘rin</div>
-          <div className="py-3 px-4">Foydalanuvchi</div>
-          <div className="py-3 px-4 text-center">Takliflar</div>
-          <div className="py-3 px-4 text-right">Mukofot</div>
-        </div>
-
-        {/* 🔄 Yuklanish jarayoni */}
-        {loading && (
-          <div className="py-10 text-center text-yellow-300/70 animate-pulse">
-            ⏳ Yuklanmoqda...
-          </div>
-        )}
-
         {!loading && (
           <div className="divide-y divide-yellow-600/10">
             {data.slice(0, 10).map((row, i) => {
               const rank = i + 1;
               const prize = getPrize(rank);
-              const glow =
-                rank === 1
-                  ? "from-yellow-500/20 to-yellow-300/10"
-                  : rank === 2
-                  ? "from-gray-400/20 to-gray-200/10"
-                  : rank === 3
-                  ? "from-amber-500/10 to-amber-200/5"
-                  : "from-yellow-900/10 to-black/5";
-
               return (
                 <div
                   key={i}
-                  className={`grid grid-cols-4 items-center py-4 px-4 text-sm sm:text-base transition-all hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(255,215,0,0.3)] bg-gradient-to-r ${glow}`}
+                  className={`grid grid-cols-4 items-center py-4 px-4 text-sm sm:text-base cursor-pointer hover:bg-yellow-500/10 transition`}
+                  onClick={() =>
+                    handleShowReferrals(row.referrerId, row.username)
+                  }
                 >
                   <div className="flex items-center gap-2">
                     {getRankIcon(rank)}
@@ -114,7 +103,7 @@ export default function Leaderboard() {
                     <span>{row.username || row.first_name || "Foydalanuvchi"}</span>
                   </div>
                   <div className="text-center font-semibold text-yellow-300">
-                    {row.total || 0}
+                    {row.totalRefs || 0}
                   </div>
                   <div className="text-right font-semibold text-yellow-200">
                     {prize}
@@ -122,21 +111,59 @@ export default function Leaderboard() {
                 </div>
               );
             })}
-
-            {data.length === 0 && (
-              <div className="text-center py-8 text-yellow-300/60">
-                😴 Hozircha hech kim mavjud emas...
-              </div>
-            )}
           </div>
         )}
       </div>
 
-      {/* 💰 Bonus izohi */}
-      <div className="text-center text-sm text-yellow-200/60 mt-8">
-        💰 Umumiy mukofot jamg‘armasi:{" "}
-        <b>1 000 000 so‘m + Premium sovg‘alar</b>
-      </div>
+      {/* 🔹 Modal oyna */}
+      {modalOpen && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-gray-900 rounded-2xl p-6 w-96 border border-yellow-500/30 relative shadow-lg">
+            <button
+              className="absolute top-3 right-3 text-yellow-400 hover:text-white transition"
+              onClick={() => setModalOpen(false)}
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <h2 className="text-lg font-bold text-yellow-300 mb-3 text-center">
+              {selectedUser}’ning referallari
+            </h2>
+
+            {referrals.length > 0 ? (
+              <ul className="space-y-3 max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-yellow-600/30">
+                {referrals.map((r, idx) => (
+                  <li
+                    key={idx}
+                    className="flex items-center gap-3 bg-black/30 p-2 rounded-lg border border-yellow-600/10"
+                  >
+                    {r.avatar ? (
+                      <img
+                        src={r.avatar}
+                        alt="avatar"
+                        className="w-8 h-8 rounded-full border border-yellow-500/30"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-yellow-600/20 border border-yellow-600/40" />
+                    )}
+                    <div>
+                      <p className="font-medium text-yellow-100">
+                        {r.username || r.first_name || "Ismsiz foydalanuvchi"}
+                      </p>
+                      <p className="text-xs text-yellow-400/60">
+                        {new Date(r.joinedAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-center text-yellow-400/70 mt-4">
+                Hozircha hech kimni chaqirmagan 😴
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
