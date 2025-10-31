@@ -16,17 +16,17 @@ export default function Rewards() {
   const [remainingSpins, setRemainingSpins] = useState(1);
 
   const prizes = [
-    { name: "Omadsiz 😢", probability: 0.7, color: "#5C4033" },
-    { name: "5 000 so‘m", probability: 0.1, color: "#B8860B" },
-    { name: "10 000 so‘m", probability: 0.08, color: "#C9A227" },
-    { name: "20 000 so‘m", probability: 0.05, color: "#E6BE8A" },
-    { name: "50 000 so‘m", probability: 0.03, color: "#FFD700" },
-    { name: "100 000 so‘m", probability: 0.02, color: "#FFEA00" },
+    { name: "Omadsiz 😢", probability: 0.5, color: "#5C4033" },
+    { name: "5 000 so‘m", probability: 0.2, color: "#B8860B" },
+    { name: "10 000 so‘m", probability: 0.1, color: "#C9A227" },
+    { name: "20 000 so‘m", probability: 0.09, color: "#E6BE8A" },
+    { name: "50 000 so‘m", probability: 0.05, color: "#FFD700" },
+    { name: "100 000 so‘m", probability: 0.01, color: "#FFEA00" },
     { name: "Smart-soat", probability: 0.008, color: "#FFCC33" },
     { name: "Powerbank", probability: 0.007, color: "#F5DEB3" },
     { name: "Qo‘l soati", probability: 0.006, color: "#D4AF37" },
     { name: "Planshet", probability: 0.004, color: "#FFF8DC" },
-    { name: "iPhone 17 Pro Max", probability: 0.002, color: "#FFD700" },
+    { name: "iPhone 17 Pro Max", probability: 0.0002, color: "#FFD700" },
   ];
 
   const SEGMENTS = prizes.length;
