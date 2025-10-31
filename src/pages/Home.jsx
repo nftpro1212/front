@@ -10,7 +10,18 @@ export default function Home() {
   const [error, setError] = useState("");
 
   // 🔹 Telegram WebApp orqali login
+useEffect(() => {
+    const tg = window.Telegram?.WebApp;
+    tg?.ready();
 
+    const startParam = tg?.initDataUnsafe?.start_param; // 🔹 referralCode
+    const telegramUser = tg?.initDataUnsafe?.user || {
+      id: 123456,
+      username: "test_user",
+      first_name: "Test",
+      last_name: "User",
+      photo_url: "/avatar-placeholder.png",
+    };
     const loginUser = async () => {
       try {
         const res = await API.post("/telegram/login", {
