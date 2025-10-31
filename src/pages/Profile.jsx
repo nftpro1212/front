@@ -56,7 +56,7 @@ export default function Profile() {
     );
 
   // ✅ Telegram WebApp uchun referral havola
-  const referralLink = `https://t.me/nft_userrbot?startapp=${user.referralCode}`;
+  const referralLink = `https://t.me/NFT_USERRBOT/car?startapp=${user.referralCode}`;
 
   const handleSubscribe = async () => {
   try {
