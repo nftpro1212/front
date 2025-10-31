@@ -138,7 +138,10 @@ export default function Home() {
           <CountdownTimer targetDateISO={getMonthEndISO()} />
         </div>
 
-        
+        <div className="text-center text-gray-400 text-sm">
+          <span className="text-yellow-400 font-semibold">{premiumCount}</span>{" "}
+
+        </div>
       </div>
     </main>
   );
