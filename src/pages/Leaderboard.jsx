@@ -9,6 +9,7 @@ export default function Leaderboard() {
   const [referrals, setReferrals] = useState([]);
   const [modalOpen, setModalOpen] = useState(false);
 
+  // 🔹 Yetakchilar ro‘yxatini olish
   useEffect(() => {
     API.get("/referrals/leaderboard")
       .then((res) => setData(res.data.leaderboard || []))
@@ -18,6 +19,7 @@ export default function Leaderboard() {
       .finally(() => setLoading(false));
   }, []);
 
+  // 🏆 Sovrinlarni belgilash
   const getPrize = (rank) => {
     const cashPrizes = [300000, 200000, 150000, 120000, 90000, 70000, 50000];
     switch (rank) {
@@ -34,6 +36,7 @@ export default function Leaderboard() {
     }
   };
 
+  // 🥇 Rank ikonkalari
   const getRankIcon = (rank) => {
     switch (rank) {
       case 1:
@@ -54,9 +57,14 @@ export default function Leaderboard() {
       setModalOpen(true);
       setReferrals([]);
       const res = await API.get(`/referrals/history/${telegramId}`);
-      setReferrals(res.data.list || []);
+      if (res.data.success) {
+        setReferrals(res.data.invited || []);
+      } else {
+        setReferrals([]);
+      }
     } catch (err) {
       console.error("Referral tarix xatosi:", err);
+      setReferrals([]);
     }
   };
 
@@ -82,10 +90,10 @@ export default function Leaderboard() {
               return (
                 <div
                   key={i}
-                  className={`grid grid-cols-4 items-center py-4 px-4 text-sm sm:text-base cursor-pointer hover:bg-yellow-500/10 transition`}
+                  className="grid grid-cols-4 items-center py-4 px-4 text-sm sm:text-base cursor-pointer hover:bg-yellow-500/10 transition"
                   onClick={() =>
-                    handleShowReferrals(row.referrerId, row.username)
-                  }
+                    handleShowReferrals(row.telegramId, row.username)
+                  } // ✅ to‘g‘rilandi
                 >
                   <div className="flex items-center gap-2">
                     {getRankIcon(rank)}
@@ -100,7 +108,9 @@ export default function Leaderboard() {
                     ) : (
                       <div className="w-6 h-6 rounded-full bg-yellow-500/20 border border-yellow-600/40" />
                     )}
-                    <span>{row.username || row.first_name || "Foydalanuvchi"}</span>
+                    <span>
+                      {row.username || row.first_name || "Foydalanuvchi"}
+                    </span>
                   </div>
                   <div className="text-center font-semibold text-yellow-300">
                     {row.totalRefs || 0}
