@@ -34,7 +34,7 @@ export default function ReferralBox({ link }) {
         <h3 className="text-lg font-semibold text-yellow-300 flex items-center gap-2">
           <Users size={18} /> Takliflaringiz
         </h3>
-        <span className="text-2xl font-bold text-yellow-400">{totalReferrals}</span>
+        <span className="text-2xl font-bold text-yellow-400">{referralCount}</span>
       </div>
 
       <div className="mt-3 text-sm text-gray-300">
