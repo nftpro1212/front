@@ -75,7 +75,7 @@ export default function Home() {
           <div>
             <div className="text-sm text-gray-300">Keyingi o‘yin</div>
             <div className="font-semibold text-lg text-yellow-300">
-              Premium foydalanuvchilar uchun
+
             </div>
           </div>
           <CountdownTimer targetDateISO={getMonthEndISO()} />
