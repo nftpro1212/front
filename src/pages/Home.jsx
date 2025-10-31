@@ -9,40 +9,6 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // 🔹 Telegram WebApp orqali login
-useEffect(() => {
-    const tg = window.Telegram?.WebApp;
-    tg?.ready();
-
-    const startParam = tg?.initDataUnsafe?.start_param; // 🔹 referralCode
-    const telegramUser = tg?.initDataUnsafe?.user || {
-      id: 123456,
-      username: "test_user",
-      first_name: "Test",
-      last_name: "User",
-      photo_url: "/avatar-placeholder.png",
-    };
-    const loginUser = async () => {
-      try {
-        const res = await API.post("/telegram/login", {
-          telegramId: telegramUser.id,
-          username: telegramUser.username,
-          first_name: telegramUser.first_name,
-          last_name: telegramUser.last_name,
-          avatar: telegramUser.photo_url,
-          referralCode: startParam || null,
-        });
-        setUser(res.data.user);
-      } catch (err) {
-        console.error("❌ Login xatosi:", err.response?.data || err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loginUser();
-  }, []);
-
 
   // 🔹 Premium tugmasi bosilganda adminga yo‘naltirish
   const handleSubscribe = async () => {
