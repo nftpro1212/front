@@ -131,7 +131,7 @@ export default function Home() {
               }`}
             >
               {isPremium
-                ? "Premium foydalanuvchilar uchun o‘yin"
+                ? ""
                 :"" }
             </div>
           </div>
