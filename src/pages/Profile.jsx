@@ -59,17 +59,25 @@ export default function Profile() {
   const referralLink = `https://t.me/nft_userrbot?startapp=${user.referralCode}`;
 
   const handleSubscribe = async () => {
-    try {
-      const tgId = user.telegramId;
-      const res = await API.post("/subscribe", { tgId });
-      if (res.data.paymentUrl) {
-        // 🔹 admin Telegram linkini ochish
-        window.open(res.data.paymentUrl, "_blank");
+  try {
+    const tgId = user.telegramId;
+    const res = await API.post("/subscribe", { tgId });
+
+    if (res.data.paymentUrl) {
+      const tg = window.Telegram?.WebApp;
+      if (tg?.openTelegramLink) {
+        tg.openTelegramLink(res.data.paymentUrl); // ✅ Telegram ichida ochadi
+      } else {
+        window.location.href = res.data.paymentUrl; // ✅ Browserda ochadi
       }
-    } catch (err) {
-      console.error("Obuna bo‘lishda xato:", err);
+    } else {
+      alert("To‘lov havolasi topilmadi!");
     }
-  };
+  } catch (err) {
+    console.error("❌ Obuna bo‘lishda xato:", err);
+    alert("Server bilan bog‘lanishda xato yuz berdi!");
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#000000] text-white px-4 py-10 md:py-16">
