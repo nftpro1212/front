@@ -32,9 +32,9 @@ export default function ReferralBox({ link }) {
     <div className="bg-gradient-to-br from-[#1b1b1b] via-[#2a2a2a] to-[#000] p-5 rounded-2xl border border-yellow-500/20 shadow-[0_0_20px_rgba(255,215,0,0.15)]">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-yellow-300 flex items-center gap-2">
-          <Users size={18} /> Takliflaringiz
+          <Users size={18} /> Taklif
         </h3>
-        <span className="text-2xl font-bold text-yellow-400">{referralCount}</span>
+        <span className="text-2xl font-bold text-yellow-400">{totalReferrals}</span>
       </div>
 
       <div className="mt-3 text-sm text-gray-300">
