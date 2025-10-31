@@ -80,8 +80,8 @@ export default function Profile() {
   };
 
   // ✅ Guruh va kanal linklari
-  const groupLink = "https://t.me/NFT_USER_GROUP";
-  const channelLink = "https://t.me/NFT_USER_CHANNEL";
+  const groupLink = "https://t.me/I00K_Clubchat";
+  const channelLink = "https://t.me/klub_100k";
 
   const joinGroup = () => {
     const tg = window.Telegram?.WebApp;
