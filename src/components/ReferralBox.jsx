@@ -5,17 +5,31 @@ import { Copy, Users } from "lucide-react";
 export default function ReferralBox({ link }) {
   const [referralCount, setReferralCount] = useState(0);
   const [copied, setCopied] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
-    const userId = tg?.initDataUnsafe?.user?.id || 9999;
+    const userId = tg?.initDataUnsafe?.user?.id;
+
+    // Agar Telegram ID topilmasa, chiqib ketamiz
+    if (!userId) {
+      console.warn("⚠️ Telegram foydalanuvchi ID topilmadi");
+      setLoading(false);
+      return;
+    }
 
     const fetchReferralCount = async () => {
       try {
         const res = await API.get(`/referrals/count?tgId=${userId}`);
-        if (res.data.success) setReferralCount(res.data.count);
+        if (res.data && res.data.success) {
+          setReferralCount(res.data.count);
+        } else {
+          console.warn("⚠️ Referral count topilmadi:", res.data);
+        }
       } catch (err) {
         console.error("❌ Referral count xatosi:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -34,7 +48,9 @@ export default function ReferralBox({ link }) {
         <h3 className="text-lg font-semibold text-yellow-300 flex items-center gap-2">
           <Users size={18} /> Takliflaringiz
         </h3>
-        <span className="text-2xl font-bold text-yellow-400">{referralCount}</span>
+        <span className="text-2xl font-bold text-yellow-400">
+          {loading ? "..." : referralCount}
+        </span>
       </div>
 
       <div className="mt-3 text-sm text-gray-300">
