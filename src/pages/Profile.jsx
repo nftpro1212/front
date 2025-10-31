@@ -41,19 +41,48 @@ export default function Profile() {
     loginUser();
   }, []);
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center h-screen text-lg text-yellow-400 animate-pulse">
-        ⏳ Yuklanmoqda...
+ if (loading)
+  return (
+    <div className="flex flex-col justify-center items-center h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#000000] text-yellow-400">
+      <div className="relative w-24 h-24">
+        <div className="absolute inset-0 rounded-full border-4 border-t-transparent border-yellow-400 animate-spin"></div>
+        <div className="absolute inset-2 rounded-full border-2 border-t-transparent border-yellow-200 animate-[spin_3s_linear_infinite_reverse]"></div>
+        <div className="absolute inset-5 bg-gradient-to-br from-yellow-400 to-yellow-200 rounded-full shadow-[0_0_25px_rgba(255,215,0,0.5)]"></div>
       </div>
-    );
 
-  if (!user)
-    return (
-      <div className="flex justify-center items-center h-screen text-lg text-red-400">
-        ❌ Foydalanuvchi topilmadi
+      <p className="mt-8 text-lg font-semibold tracking-wide text-yellow-300 animate-pulse">
+         Ma’lumotlar yuklanmoqda...
+      </p>
+    </div>
+  );
+
+ if (!user)
+  return (
+    <div className="flex flex-col items-center justify-center h-screen bg-gradient-to-br from-[#0a0a0a] via-[#141414] to-[#000000] text-yellow-300">
+      {/* 🔁 Aylanadigan ikonka */}
+      <div className="relative w-24 h-24 mb-6">
+        <div className="absolute inset-0 rounded-full border-4 border-t-transparent border-yellow-400 animate-spin"></div>
+        <div className="absolute inset-3 rounded-full border-2 border-t-transparent border-yellow-200 animate-[spin_3s_linear_infinite_reverse]"></div>
+        <div className="absolute inset-6 bg-gradient-to-br from-yellow-400 to-yellow-200 rounded-full animate-pulse shadow-[0_0_25px_rgba(255,215,0,0.5)]"></div>
       </div>
-    );
+
+      {/* 🔸 Matnlar */}
+      <h2 className="text-2xl font-semibold text-yellow-300 animate-bounce">
+        Xatolik
+      </h2>
+      <p className="mt-3 text-lg text-yellow-200 animate-pulse">
+        🔁 Qayta urinib ko‘ring
+      </p>
+
+      {/* 🔘 Qayta urinish tugmasi */}
+      <button
+        onClick={() => window.location.reload()}
+        className="mt-6 px-6 py-3 bg-gradient-to-r from-yellow-400 to-yellow-200 text-black font-semibold rounded-xl shadow-lg hover:scale-105 transition-transform duration-300"
+      >
+        Qayta yuklash
+      </button>
+    </div>
+  );
 
   // ✅ Telegram WebApp uchun referral havola
   const referralLink = `https://t.me/I00K_Club_bot/premium?startapp=${user.referralCode}`;
