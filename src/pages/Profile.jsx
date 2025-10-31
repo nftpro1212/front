@@ -59,29 +59,46 @@ export default function Profile() {
   const referralLink = `https://t.me/NFT_USERRBOT/car?startapp=${user.referralCode}`;
 
   const handleSubscribe = async () => {
-  try {
-    const tgId = user.telegramId;
-    const res = await API.post("/subscribe", { tgId });
+    try {
+      const tgId = user.telegramId;
+      const res = await API.post("/subscribe", { tgId });
 
-    if (res.data.paymentUrl) {
-      const tg = window.Telegram?.WebApp;
-      if (tg?.openTelegramLink) {
-        tg.openTelegramLink(res.data.paymentUrl); // ✅ Telegram ichida ochadi
+      if (res.data.paymentUrl) {
+        const tg = window.Telegram?.WebApp;
+        if (tg?.openTelegramLink) {
+          tg.openTelegramLink(res.data.paymentUrl);
+        } else {
+          window.location.href = res.data.paymentUrl;
+        }
       } else {
-        window.location.href = res.data.paymentUrl; // ✅ Browserda ochadi
+        alert("To‘lov havolasi topilmadi!");
       }
-    } else {
-      alert("To‘lov havolasi topilmadi!");
+    } catch (err) {
+      console.error("❌ Obuna bo‘lishda xato:", err);
+      alert("Server bilan bog‘lanishda xato yuz berdi!");
     }
-  } catch (err) {
-    console.error("❌ Obuna bo‘lishda xato:", err);
-    alert("Server bilan bog‘lanishda xato yuz berdi!");
-  }
-};
+  };
+
+  // ✅ Guruh va kanal linklari
+  const groupLink = "https://t.me/NFT_USER_GROUP";
+  const channelLink = "https://t.me/NFT_USER_CHANNEL";
+
+  const joinGroup = () => {
+    const tg = window.Telegram?.WebApp;
+    if (tg?.openTelegramLink) tg.openTelegramLink(groupLink);
+    else window.open(groupLink, "_blank");
+  };
+
+  const joinChannel = () => {
+    const tg = window.Telegram?.WebApp;
+    if (tg?.openTelegramLink) tg.openTelegramLink(channelLink);
+    else window.open(channelLink, "_blank");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a0a0a] via-[#1a1a1a] to-[#000000] text-white px-4 py-10 md:py-16">
       <div className="max-w-2xl mx-auto space-y-8">
+
         {/* 🧑‍💻 Foydalanuvchi ma’lumotlari */}
         <div className="relative glassy p-5 rounded-2xl bg-white/5 backdrop-blur-md border border-yellow-400/20 shadow-[0_0_20px_rgba(255,215,0,0.15)]">
           <div className="flex items-center gap-4">
@@ -121,6 +138,33 @@ export default function Profile() {
 
         {/* 🔗 ReferralBox */}
         <ReferralBox link={referralLink} referralCode={user.referralCode} />
+
+        {/* 📢 Kanal va guruhga qo‘shilish */}
+        <div className="bg-white/5 p-5 rounded-2xl border border-yellow-400/20 backdrop-blur-md text-center space-y-4 shadow-[0_0_15px_rgba(255,215,0,0.1)]">
+          <h3 className="text-lg font-semibold text-yellow-300">
+            📢 Bizning hamjamiyatga qo‘shiling!
+          </h3>
+          <p className="text-gray-300 text-sm">
+            Yangiliklar, bonuslar va o‘yinlar haqida birinchi bo‘lib bilish uchun
+            rasmiy kanal va guruhimizga qo‘shiling 👇
+          </p>
+
+          <div className="flex flex-col sm:flex-row justify-center gap-3 mt-4">
+            <button
+              onClick={joinChannel}
+              className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-5 py-2 rounded-lg transition-all"
+            >
+              📣 Kanalga qo‘shilish
+            </button>
+            <button
+              onClick={joinGroup}
+              className="bg-yellow-400/20 hover:bg-yellow-400/30 text-yellow-300 font-semibold px-5 py-2 rounded-lg border border-yellow-400/30 transition-all"
+            >
+              💬 Guruhga qo‘shilish
+            </button>
+          </div>
+        </div>
+
       </div>
     </div>
   );
