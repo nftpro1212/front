@@ -22,7 +22,7 @@ export default function Profile() {
 
     const loginUser = async () => {
       try {
-        const res = await API.post("/telegram/login", {
+        const res = await API.post("/login", {
           telegramId: telegramUser.id,
           username: telegramUser.username,
           first_name: telegramUser.first_name,
